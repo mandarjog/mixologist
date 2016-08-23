@@ -32,7 +32,17 @@ type (
 	Handler struct {
 		Server ServiceControllerServer
 	}
-
 	ControllerImpl struct {
+		ReportQueue chan sc.ReportRequest
+	}
+
+	ReportConsumer interface {
+		// Set consumer channel, this channel should be emptied by the
+		// implementation
+		SetReportQueue(chan sc.ReportRequest)
+		// Start consuming from the channel
+		Start()
+		// Stop Processing
+		Stop()
 	}
 )

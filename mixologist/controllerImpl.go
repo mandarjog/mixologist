@@ -21,7 +21,14 @@ func (c *ControllerImpl) Check(ctx context.Context, msg *sc.CheckRequest) (*sc.C
 // Report into a log file
 func (c *ControllerImpl) Report(ctx context.Context, msg *sc.ReportRequest) (*sc.ReportResponse, error) {
 	dbg, _ := json.Marshal(msg)
+	c.ReportQueue <- *msg
 	glog.Info(string(dbg))
 	resp := &sc.ReportResponse{}
 	return resp, nil
+}
+
+func NewControllerImpl() *ControllerImpl {
+	return &ControllerImpl{
+		ReportQueue: make(chan sc.ReportRequest),
+	}
 }
