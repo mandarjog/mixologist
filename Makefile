@@ -17,20 +17,26 @@ dep-prep:
 		exit 1; \
 	fi
 
-test: build
+test: mixologist-bin
 	go test -v -cpu 1,4 ./mixologist/...
 
 testrace: test
 	go test -v -race -cpu 1,4 ./mixologist/...  -coverprofile=coverage.out
 
 clean:
-	go clean -i ./...
+	go clean -i ./... 
+	rm -f mixologist-bin
 
 coverage: build
 	./coverage.sh --coveralls
 
-build:
-	go build main.go
+mixologist-bin: main.go mixologist/*.go
+	go build -o mixologist-bin main.go
+
+build: mixologist-bin
+
+run: mixologist-bin
+	./mixologist-bin -v=2 -logtostderr=true
 
 .PHONY: \
 	all \
@@ -39,4 +45,5 @@ build:
 	test \
 	testrace \
 	clean \
-	coverage
+	coverage \
+	run
