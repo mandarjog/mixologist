@@ -5,13 +5,18 @@ import (
 	"github.com/golang/glog"
 	"net/http"
 	"somnacin-internal/mixologist/mixologist"
+	"strconv"
 )
 
 func main() {
+	portPtr := flag.Int("port", mixologist.Port, "port")
+
 	flag.Parse()
 	handler := mixologist.NewHandler(&mixologist.ControllerImpl{})
+	addr := ":" + strconv.Itoa(*portPtr)
+	glog.Info("Starting Server on " + addr)
 	srv := http.Server{
-		Addr:    mixologist.Port,
+		Addr:    addr,
 		Handler: handler,
 	}
 	err := srv.ListenAndServe()

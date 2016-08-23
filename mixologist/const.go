@@ -1,5 +1,5 @@
 package mixologist
 
 const (
-	Port = ":9092"
+	Port = 9092
 )
