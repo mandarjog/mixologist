@@ -1,0 +1,2 @@
+1. Only use .proto files and build using protoc
+2. Convert to bazel build

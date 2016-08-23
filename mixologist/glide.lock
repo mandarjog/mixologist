@@ -1,0 +1,25 @@
+hash: fbe3dff8bdb2d0bf62ac1ffe069cc9a34fe9497ca45480d98ffea6de37e8f63f
+updated: 2016-08-23T13:08:23.485763632-07:00
+imports:
+- name: github.com/golang/glog
+  version: 23def4e6c14b4da8ac2ed8007337bc5eb5007998
+- name: github.com/golang/protobuf
+  version: f592bd283e9ef86337a432eb50e592278c3d534d
+  subpackages:
+  - proto
+  - ptypes/any
+  - ptypes/duration
+  - ptypes/struct
+  - ptypes/timestamp
+  - ptypes/wrappers
+- name: github.com/onsi/ginkgo
+  version: 462326b1628e124b23f42e87a8f2750e3c4e2d24
+  subpackages:
+  - ginkgo
+- name: golang.org/x/net
+  version: 7394c112eae4dba7e96bfcfe738e6373d61772b4
+  subpackages:
+  - context
+- name: google/api/servicecontrol/v1
+  version: ""
+testImports: []
