@@ -48,6 +48,6 @@ type (
 		Stop()
 		// Get path mapping and handler
 		// can return nil
-		GetPathandHandler() (string, http.Handler)
+		GetPrefixAndHandler() (string, http.Handler)
 	}
 )

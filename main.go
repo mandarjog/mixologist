@@ -18,7 +18,7 @@ func main() {
 	reportConsumer.SetReportQueue(controller.ReportQueue)
 	flag.Parse()
 
-	handler.AddHandler(reportConsumer.GetPathandHandler())
+	handler.AddHandler(reportConsumer.GetPrefixAndHandler())
 	addr := ":" + strconv.Itoa(port)
 	srv := http.Server{
 		Addr:    addr,
