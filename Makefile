@@ -13,7 +13,8 @@ proto:
 
 dep-prep:
 	@ if ! which glide > /dev/null; then \
-		echo "error: glide depedency mget not installed not installed" >&2; \
+		echo "error: glide depedency not installed not installed" >&2; \
+		echo "error: https://github.com/Masterminds/glide/releases/tag/v0.11.1 " >&2; \
 		exit 1; \
 	fi
 
@@ -30,7 +31,7 @@ clean:
 coverage: build
 	./coverage.sh --coveralls
 
-mixologist-bin: main.go mixologist/*.go
+mixologist-bin: dep-prep main.go mixologist/*.go
 	go build -o mixologist-bin main.go
 
 build: mixologist-bin
