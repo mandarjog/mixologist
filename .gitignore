@@ -35,3 +35,5 @@ coverage.out
 .project
 .settings/*
 .externalToolBuilders/*
+vendor
+vendor/*
