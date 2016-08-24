@@ -1,4 +1,14 @@
 package: somnacin-internal/mixologist
+ignore:
+- google
+- google/api
+- google/api/servicecontrol
+- google/api/servicecontrol/v1
+- google/logging
+- google/logging/type
+- google/protobuf
+- google/rpc
+- google/type  
 import:
 - package: github.com/golang/glog
 - package: github.com/golang/protobuf
