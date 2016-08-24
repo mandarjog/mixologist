@@ -1,10 +1,14 @@
-hash: 58d12af570f91e2abe9478d9bf9ffa069a2417237d88e5a37d4a56ff14124f82
-updated: 2016-08-23T13:19:26.956771535-07:00
+hash: e142ec48556fbc49c75a813116501750b23519588a7b6cfd5748b37e7330c103
+updated: 2016-08-24T08:09:33.63781732-07:00
 imports:
+- name: github.com/beorn7/perks
+  version: cfb91f6d4c903f798ddc135b758b7c39b7068f30
+  subpackages:
+  - quantile
 - name: github.com/golang/glog
-  version: 23def4e6c14b4da8ac2ed8007337bc5eb5007998
+  version: cfb91f6d4c903f798ddc135b758b7c39b7068f30
 - name: github.com/golang/protobuf
-  version: f592bd283e9ef86337a432eb50e592278c3d534d
+  version: cfb91f6d4c903f798ddc135b758b7c39b7068f30
   subpackages:
   - proto
   - ptypes/any
@@ -12,14 +16,34 @@ imports:
   - ptypes/struct
   - ptypes/timestamp
   - ptypes/wrappers
+- name: github.com/matttproud/golang_protobuf_extensions
+  version: cfb91f6d4c903f798ddc135b758b7c39b7068f30
+  subpackages:
+  - pbutil
 - name: github.com/onsi/ginkgo
-  version: 462326b1628e124b23f42e87a8f2750e3c4e2d24
+  version: ""
   subpackages:
   - ginkgo
 - name: github.com/onsi/gomega
-  version: a78ae492d53aad5a7a232d0d0462c14c400e3ee7
+  version: ""
+- name: github.com/prometheus/client_golang
+  version: cfb91f6d4c903f798ddc135b758b7c39b7068f30
+  subpackages:
+  - prometheus
+- name: github.com/prometheus/client_model
+  version: cfb91f6d4c903f798ddc135b758b7c39b7068f30
+  subpackages:
+  - go
+- name: github.com/prometheus/common
+  version: cfb91f6d4c903f798ddc135b758b7c39b7068f30
+  subpackages:
+  - expfmt
+  - model
+  - internal/bitbucket.org/ww/goautoneg
+- name: github.com/prometheus/procfs
+  version: cfb91f6d4c903f798ddc135b758b7c39b7068f30
 - name: golang.org/x/net
-  version: 7394c112eae4dba7e96bfcfe738e6373d61772b4
+  version: cfb91f6d4c903f798ddc135b758b7c39b7068f30
   subpackages:
   - context
 testImports: []
