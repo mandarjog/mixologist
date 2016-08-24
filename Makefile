@@ -37,7 +37,7 @@ mixologist-bin: dep-prep main.go mixologist/*.go
 build: mixologist-bin
 
 run: mixologist-bin
-	./mixologist-bin -v=2 -logtostderr=true
+	./mixologist-bin -v=1 -logtostderr=true
 
 .PHONY: \
 	all \
