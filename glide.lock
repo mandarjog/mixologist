@@ -1,14 +1,14 @@
 hash: e142ec48556fbc49c75a813116501750b23519588a7b6cfd5748b37e7330c103
-updated: 2016-08-24T08:09:33.63781732-07:00
+updated: 2016-08-24T08:22:40.605300124-07:00
 imports:
 - name: github.com/beorn7/perks
-  version: cfb91f6d4c903f798ddc135b758b7c39b7068f30
+  version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
   subpackages:
   - quantile
 - name: github.com/golang/glog
-  version: cfb91f6d4c903f798ddc135b758b7c39b7068f30
+  version: 23def4e6c14b4da8ac2ed8007337bc5eb5007998
 - name: github.com/golang/protobuf
-  version: cfb91f6d4c903f798ddc135b758b7c39b7068f30
+  version: 888eb0692c857ec880338addf316bd662d5e630e
   subpackages:
   - proto
   - ptypes/any
@@ -17,33 +17,33 @@ imports:
   - ptypes/timestamp
   - ptypes/wrappers
 - name: github.com/matttproud/golang_protobuf_extensions
-  version: cfb91f6d4c903f798ddc135b758b7c39b7068f30
+  version: c12348ce28de40eed0136aa2b644d0ee0650e56c
   subpackages:
   - pbutil
 - name: github.com/onsi/ginkgo
-  version: ""
+  version: 462326b1628e124b23f42e87a8f2750e3c4e2d24
   subpackages:
   - ginkgo
 - name: github.com/onsi/gomega
-  version: ""
+  version: a78ae492d53aad5a7a232d0d0462c14c400e3ee7
 - name: github.com/prometheus/client_golang
-  version: cfb91f6d4c903f798ddc135b758b7c39b7068f30
+  version: c5b7fccd204277076155f10851dad72b76a49317
   subpackages:
   - prometheus
 - name: github.com/prometheus/client_model
-  version: cfb91f6d4c903f798ddc135b758b7c39b7068f30
+  version: fa8ad6fec33561be4280a8f0514318c79d7f6cb6
   subpackages:
   - go
 - name: github.com/prometheus/common
-  version: cfb91f6d4c903f798ddc135b758b7c39b7068f30
+  version: ebdfc6da46522d58825777cf1f90490a5b1ef1d8
   subpackages:
   - expfmt
   - model
   - internal/bitbucket.org/ww/goautoneg
 - name: github.com/prometheus/procfs
-  version: cfb91f6d4c903f798ddc135b758b7c39b7068f30
+  version: abf152e5f3e97f2fafac028d2cc06c1feb87ffa5
 - name: golang.org/x/net
-  version: cfb91f6d4c903f798ddc135b758b7c39b7068f30
+  version: 7394c112eae4dba7e96bfcfe738e6373d61772b4
   subpackages:
   - context
 testImports: []
