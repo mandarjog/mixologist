@@ -1,8 +1,6 @@
 package mixologist
 
 import (
-	"encoding/json"
-	"github.com/golang/glog"
 	"golang.org/x/net/context"
 	sc "google/api/servicecontrol/v1"
 )
@@ -20,9 +18,7 @@ func (c *ControllerImpl) Check(ctx context.Context, msg *sc.CheckRequest) (*sc.C
 
 // Report into a log file
 func (c *ControllerImpl) Report(ctx context.Context, msg *sc.ReportRequest) (*sc.ReportResponse, error) {
-	dbg, _ := json.Marshal(msg)
 	c.ReportQueue <- *msg
-	glog.Info(string(dbg))
 	resp := &sc.ReportResponse{}
 	return resp, nil
 }
