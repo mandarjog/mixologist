@@ -12,9 +12,14 @@ import (
 
 func NewHandler(server ServiceControllerServer) *Handler {
 	return &Handler{
-		Server: server,
+		Server:     server,
+		HandlerMap: make(map[string]http.Handler),
 	}
 
+}
+
+func (h *Handler) AddHandler(prefix string, hh http.Handler) {
+	h.HandlerMap[prefix] = hh
 }
 
 // Perform common preamble during message specific processing
@@ -80,6 +85,14 @@ func (h *Handler) GetServerFn(w http.ResponseWriter, r *http.Request) ServerFn {
 
 // Implement Handler API
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	// check for registered handlers
+	for prefix, hh := range h.HandlerMap {
+		if strings.HasPrefix(r.RequestURI, prefix) {
+			hh.ServeHTTP(w, r)
+			return
+		}
+	}
+
 	var fn = h.GetServerFn(w, r)
 	if fn == nil {
 		return

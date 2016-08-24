@@ -3,6 +3,7 @@ package mixologist
 import (
 	"golang.org/x/net/context"
 	sc "google/api/servicecontrol/v1"
+	"net/http"
 )
 
 type (
@@ -30,7 +31,8 @@ type (
 	}
 
 	Handler struct {
-		Server ServiceControllerServer
+		Server     ServiceControllerServer
+		HandlerMap map[string]http.Handler
 	}
 	ControllerImpl struct {
 		ReportQueue chan sc.ReportRequest
@@ -44,5 +46,8 @@ type (
 		Start()
 		// Stop Processing
 		Stop()
+		// Get path mapping and handler
+		// can return nil
+		GetPathandHandler() (string, http.Handler)
 	}
 )
