@@ -18,3 +18,4 @@ import:
   - ginkgo
 - package: github.com/onsi/gomega
   version: ^1.0.0
+- package: github.com/prometheus/client_golang/prometheus
