@@ -1,0 +1,4 @@
+1. Dockerize slightly modified version of bookstore.
+ this version randomly changes response time
+//esp/test/bookstore
+docker build -t gcr.io/mjog-1470410002014/bookstore-mixologist -f bookstore.Dockerfile .
