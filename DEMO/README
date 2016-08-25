@@ -2,3 +2,9 @@
  this version randomly changes response time
 //esp/test/bookstore
 docker build -t gcr.io/mjog-1470410002014/bookstore-mixologist -f bookstore.Dockerfile .
+
+
+2. Copy esp.conf and bookstore.json to a gcloud disk
+gcloud compute instances detach-disk  gke-mixologist-default-pool-0b48684c-74ok --disk mixologist-cfg-disk
+
+3. 
