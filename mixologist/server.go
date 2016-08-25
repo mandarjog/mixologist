@@ -10,6 +10,7 @@ import (
 	"strings"
 )
 
+// NewHandler -- return a handler with initialized handler map
 func NewHandler(server ServiceControllerServer) *Handler {
 	return &Handler{
 		Server:     server,
@@ -18,6 +19,8 @@ func NewHandler(server ServiceControllerServer) *Handler {
 
 }
 
+// AddHandler -- Add a handler for prefixes, unsed for services like
+// prometheus
 func (h *Handler) AddHandler(prefix string, hh http.Handler) {
 	h.HandlerMap[prefix] = hh
 }
@@ -43,8 +46,8 @@ func (h *Handler) preambleProcess(w http.ResponseWriter, r *http.Request, msg pr
 	return
 }
 
-// wrapper for Server.Check
-func (h *Handler) ServerCheck(w http.ResponseWriter, r *http.Request, ctx context.Context) (resp proto.Message, err error) {
+// ServerCheck -- wrapper for Server.Check
+func (h *Handler) serverCheck(w http.ResponseWriter, r *http.Request, ctx context.Context) (resp proto.Message, err error) {
 	msg := &sc.CheckRequest{}
 
 	if err = h.preambleProcess(w, r, msg); err != nil {
@@ -53,8 +56,8 @@ func (h *Handler) ServerCheck(w http.ResponseWriter, r *http.Request, ctx contex
 	return h.Server.Check(ctx, msg)
 }
 
-// wrapper for Server.Report
-func (h *Handler) ServerReport(w http.ResponseWriter, r *http.Request, ctx context.Context) (resp proto.Message, err error) {
+// ServerReport -- wrapper for Server.Report
+func (h *Handler) serverReport(w http.ResponseWriter, r *http.Request, ctx context.Context) (resp proto.Message, err error) {
 	msg := &sc.ReportRequest{}
 
 	if err = h.preambleProcess(w, r, msg); err != nil {
@@ -63,19 +66,19 @@ func (h *Handler) ServerReport(w http.ResponseWriter, r *http.Request, ctx conte
 	return h.Server.Report(ctx, msg)
 }
 
-type ServerFn func(w http.ResponseWriter, r *http.Request, ctx context.Context) (resp proto.Message, err error)
+type serverFn func(w http.ResponseWriter, r *http.Request, ctx context.Context) (resp proto.Message, err error)
 
-// Find the handler server FN - Returns nil if unable to find
-func (h *Handler) GetServerFn(w http.ResponseWriter, r *http.Request) ServerFn {
+// GetServerFn -- Find the handler server FN - Returns nil if unable to find
+func (h *Handler) getServerFn(w http.ResponseWriter, r *http.Request) serverFn {
 	if r.Method != "POST" {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return nil
 	}
 
 	if strings.HasSuffix(r.RequestURI, ":check") {
-		return h.ServerCheck
+		return h.serverCheck
 	} else if strings.HasSuffix(r.RequestURI, ":report") {
-		return h.ServerReport
+		return h.serverReport
 	}
 
 	glog.Warning("Got unknown URI " + r.RequestURI)
@@ -93,7 +96,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	var fn = h.GetServerFn(w, r)
+	var fn = h.getServerFn(w, r)
 	if fn == nil {
 		return
 	}

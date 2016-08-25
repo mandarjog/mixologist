@@ -14,7 +14,7 @@ func main() {
 	controller := mixologist.NewControllerImpl()
 	handler := mixologist.NewHandler(controller)
 
-	reportConsumer := mixologist.NewPrometheusReporter()
+	reportConsumer := mixologist.NewPrometheusConsumer()
 	reportConsumer.SetReportQueue(controller.ReportQueue)
 	flag.Parse()
 

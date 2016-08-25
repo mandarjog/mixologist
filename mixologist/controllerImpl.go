@@ -23,6 +23,7 @@ func (c *ControllerImpl) Report(ctx context.Context, msg *sc.ReportRequest) (*sc
 	return resp, nil
 }
 
+// NewControllerImpl - return a newly created controller
 func NewControllerImpl() *ControllerImpl {
 	return &ControllerImpl{
 		ReportQueue: make(chan sc.ReportRequest),
