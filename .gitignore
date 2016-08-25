@@ -37,3 +37,4 @@ coverage.out
 .externalToolBuilders/*
 vendor
 vendor/*
+dep-prep
