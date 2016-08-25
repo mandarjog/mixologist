@@ -38,16 +38,25 @@ coverage: build
 	./coverage.sh --coveralls
 
 mixologist-bin: dep-prep main.go mixologist/*.go
+	go build -o mixologist-bin main.go
+
+build: mixologist-bin main.go mixologist/*.go
 	go vet main.go 
 	golint main.go 
 	go vet mixologist/*.go
 	golint mixologist/*.go
-	go build -o mixologist-bin main.go
 
-build: mixologist-bin
 
 run: mixologist-bin
 	./mixologist-bin -v=1 -logtostderr=true
+
+
+docker: build clean
+	docker build -t mixologist .
+
+docker-run:
+	docker run -d -p 9092:9092 mixologist -v=1  -logtostderr=true
+
 
 .PHONY: \
 	all \
@@ -57,4 +66,6 @@ run: mixologist-bin
 	clean \
 	coverage \
 	build \
-	run
+	run \
+	docker \
+	docker-run
