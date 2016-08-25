@@ -1,4 +1,4 @@
-all: test
+all: build
 
 proto:
 	@ if ! which protoc > /dev/null; then \
@@ -12,11 +12,17 @@ proto:
 	done
 
 dep-prep:
+	@ if ! which golint > /dev/null; then \
+		echo "error: golint not installed" >&2; \
+		echo "go get -u github.com/golang/lint/golint" >&2;\
+		exit 1;\
+	fi
 	@ if ! which glide > /dev/null; then \
 		echo "error: glide depedency not installed not installed" >&2; \
 		echo "error: https://github.com/Masterminds/glide/releases/tag/v0.11.1 " >&2; \
 		exit 1; \
 	fi
+	@touch dep-prep
 
 test: mixologist-bin
 	go test -v -cpu 1,4 ./mixologist/...
@@ -32,6 +38,10 @@ coverage: build
 	./coverage.sh --coveralls
 
 mixologist-bin: dep-prep main.go mixologist/*.go
+	go vet main.go 
+	golint main.go 
+	go vet mixologist/*.go
+	golint mixologist/*.go
 	go build -o mixologist-bin main.go
 
 build: mixologist-bin
@@ -41,10 +51,10 @@ run: mixologist-bin
 
 .PHONY: \
 	all \
-	build \
 	proto \
 	test \
 	testrace \
 	clean \
 	coverage \
+	build \
 	run
