@@ -22,21 +22,49 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
+# BookeStore service + ESP service + mixologist service 
+# This way one mixologist and one ESP can service multiple services
+#
+---
 apiVersion: v1
 kind: Service
 metadata:
-  name: esp-bookstore
+  name: bookstore
 spec:
   ports:
-  - port: 8080
-    protocol: TCP
-    name: http
-  - port: 8090
-    protocol: TCP
-    name: status
   - port: 8081
     protocol: TCP
     name: bookstore
+  selector:
+    app: bookstore
+  type: LoadBalancer
+----
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: bookstore
+spec:
+  replicas: 1
+  selector:
+    app: bookstore
+  template:
+    metadata:
+      labels:
+        app: bookstore
+    spec:
+      containers:
+      - name: bookstore
+        image: gcr.io/mjog-1470410002014/bookstore-mixologist
+        ports:
+          - containerPort: 8081
+# mixologist
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mixologist
+spec:
+  ports:
   - port: 9092
     protocol: TCP
     name: mixologist
@@ -44,21 +72,21 @@ spec:
     protocol: TCP
     name: prometheus
   selector:
-    app: esp-bookstore
+    app: mixologist
   type: LoadBalancer
----
+----
 apiVersion: v1
 kind: ReplicationController
 metadata:
-  name: esp-bookstore
+  name: mixologist
 spec:
   replicas: 1
   selector:
-    app: esp-bookstore
+    app: mixologist
   template:
     metadata:
       labels:
-        app: esp-bookstore
+        app: mixologist
     spec:
       volumes:
       - name: nginx-config
@@ -66,25 +94,6 @@ spec:
           pdName: mixologist-cfg-disk
           fsType: ext4
       containers:
-      - name: esp
-        image: b.gcr.io/endpoints/endpoints-runtime
-        command: [
-          "/usr/sbin/nginx", "-p", 
-          "/usr",
-        ]
-        ports:
-          - containerPort: 8080
-          - containerPort: 8090
-        securityContext:
-          privileged: true
-        volumeMounts:
-        - mountPath: /etc/nginx
-          name: nginx-config
-          readOnly: true
-      - name: bookstore
-        image: gcr.io/mjog-1470410002014/bookstore-mixologist
-        ports:
-          - containerPort: 8081
       - name: mixologist
         image: gcr.io/mjog-1470410002014/mixologist
         ports:
@@ -92,10 +101,59 @@ spec:
       - name: prometheus
         image: prom/prometheus
         args: [
-          "-config.file=/tmp/prometheus/prometheus.yml",
+          "-config.file=/tmp/prometheus/prometheus.yml"
         ]
         ports:
           - containerPort: 9090
+        volumeMounts:
         - mountPath: /tmp/prometheus
           name: nginx-config
           readOnly: true
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: esp
+spec:
+  ports:
+  - port: 8090
+    protocol: TCP
+    name: esp
+  selector:
+    app: esp
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: esp
+spec:
+  replicas: 1
+  selector:
+    app: esp 
+  template:
+    metadata:
+      labels:
+        app: esp 
+    spec:
+      volumes:
+      - name: nginx-config
+        gcePersistentDisk:
+          pdName: mixologist-cfg-esp-disk
+          fsType: ext4
+      containers:
+      - name: esp
+        image: b.gcr.io/endpoints/endpoints-runtime
+        command: [
+          "/usr/sbin/nginx", "-p", 
+          "/usr"
+        ]
+        ports:
+          - containerPort: 8090
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - mountPath: /etc/nginx
+          name: nginx-config
+          readOnly: true
+
