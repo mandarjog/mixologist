@@ -54,7 +54,7 @@ spec:
     spec:
       containers:
       - name: bookstore
-        image: gcr.io/mjog-1470410002014/bookstore-mixologist
+        image: gcr.io/mixologist-142215/bookstore-mixologist
         ports:
           - containerPort: 8081
 # mixologist
@@ -95,7 +95,7 @@ spec:
           fsType: ext4
       containers:
       - name: mixologist
-        image: gcr.io/mjog-1470410002014/mixologist
+        image: gcr.io/mixologist-142215/mixologist
         ports:
           - containerPort: 9092
       - name: prometheus
