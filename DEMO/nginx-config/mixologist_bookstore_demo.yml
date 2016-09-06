@@ -25,6 +25,8 @@
 # BookeStore service + ESP service + mixologist service 
 # This way one mixologist and one ESP can service multiple services
 #
+
+# Bookstore .js App
 ---
 apiVersion: v1
 kind: Service
@@ -54,9 +56,10 @@ spec:
     spec:
       containers:
       - name: bookstore
-        image: gcr.io/mixologist-142215/bookstore-mixologist
+        image: ${BOOKSTORE_IMAGE}
         ports:
           - containerPort: 8081
+
 # mixologist
 ---
 apiVersion: v1
@@ -68,9 +71,6 @@ spec:
   - port: 9092
     protocol: TCP
     name: mixologist
-  - port: 9090
-    protocol: TCP
-    name: prometheus
   selector:
     app: mixologist
   type: LoadBalancer
@@ -88,16 +88,45 @@ spec:
       labels:
         app: mixologist
     spec:
-      volumes:
-      - name: nginx-config
-        gcePersistentDisk:
-          pdName: mixologist-cfg-disk
-          fsType: ext4
       containers:
       - name: mixologist
-        image: gcr.io/mixologist-142215/mixologist
+        image: ${MIXOLOGIST_IMAGE}
         ports:
           - containerPort: 9092
+
+# prometheus
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus
+spec:
+  ports:
+  - port: 9090
+    protocol: TCP
+    name: prometheus
+  selector:
+    app: prometheus
+  type: LoadBalancer
+----
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: prometheus
+spec:
+  replicas: 1
+  selector:
+    app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+    spec:
+      volumes:
+      - name: prometheus-config
+        configMap:
+          name: prometheus-config
+      containers:
       - name: prometheus
         image: prom/prometheus
         args: [
@@ -107,8 +136,10 @@ spec:
           - containerPort: 9090
         volumeMounts:
         - mountPath: /tmp/prometheus
-          name: nginx-config
+          name: prometheus-config
           readOnly: true
+
+# ESP
 ---
 apiVersion: v1
 kind: Service
@@ -116,7 +147,7 @@ metadata:
   name: esp
 spec:
   ports:
-  - port: 8090
+  - port: 8080
     protocol: TCP
     name: esp
   selector:
@@ -137,23 +168,22 @@ spec:
         app: esp 
     spec:
       volumes:
-      - name: nginx-config
-        gcePersistentDisk:
-          pdName: mixologist-cfg-esp-disk
-          fsType: ext4
+      - name: bookstore-service-config
+        configMap:
+          name: bookstore-service-config
       containers:
       - name: esp
-        image: b.gcr.io/endpoints/endpoints-runtime
-        command: [
-          "/usr/sbin/nginx", "-p", 
-          "/usr"
+        image: ${ESP_IMAGE}
+        args: [
+          "--service_json_path", "/tmp/service-config/bookstore.json",
+          "--backend", "bookstore:8081",
+          #         "--dns", "10.0.0.10"
         ]
         ports:
-          - containerPort: 8090
+          - containerPort: 8080
         securityContext:
           privileged: true
         volumeMounts:
-        - mountPath: /etc/nginx
-          name: nginx-config
+        - mountPath: /tmp/service-config
+          name: bookstore-service-config
           readOnly: true
-

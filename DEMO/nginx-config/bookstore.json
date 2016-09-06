@@ -100,7 +100,7 @@
   "configVersion": 3,
   "context": {},
   "control": {
-    "environment": "servicecontrol.googleapis.com"
+    "environment": "${servicecontrol}"
   },
   "customError": {},
   "documentation": {
