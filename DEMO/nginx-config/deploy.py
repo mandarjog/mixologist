@@ -81,13 +81,24 @@ class KubeCtl(object):
         self.l.info("delete_namespace() "+self.namespace)
         return self._cmd_("delete namespace " + self.namespace, js=False)
 
-    def create_namespace(self):
-        self.l.info("create_namespace() "+self.namespace)
+
+    def get_namespace(self):
         try:
             return self._cmd_("get namespace " + self.namespace)
         except sh.ErrorReturnCode_1 as ex:
             if 'not found' not in ex.stderr:
                 raise
+        return None
+
+    def create_namespace(self, force):
+        self.l.info("create_namespace() "+self.namespace)
+        ns = self.get_namespace()
+
+        if ns is not None:
+            if force:
+                self.delete_namespace()
+            else:
+                return ns
 
         return self._cmd_("create namespace " + self.namespace)
 
@@ -136,10 +147,8 @@ def process_template(inputfile, outputfile, varmap):
 def deploy(args, log):
     kubectl = KubeCtl(args.namespace, log)
 
-    if args.force_delete_namespace:
-        kubectl.delete_namespace()
     # check / create namespace
-    kubectl.create_namespace()
+    kubectl.create_namespace(force=args.force_delete_namespace)
 
     # hydrate templates with the given info
     varmap = {k: args.__dict__[k] for k in DEPLOY_MAP}
