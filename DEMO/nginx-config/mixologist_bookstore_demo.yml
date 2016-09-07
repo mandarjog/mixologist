@@ -177,7 +177,7 @@ spec:
         args: [
           "--service_json_path", "/tmp/service-config/bookstore.json",
           "--backend", "bookstore:8081",
-          #         "--dns", "10.0.0.10"
+          "--dns", "${dns}"
         ]
         ports:
           - containerPort: 8080
