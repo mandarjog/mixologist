@@ -5,6 +5,7 @@ import os
 import tempfile
 import urlparse
 import logging
+import shutil
 
 import sh
 from sh import kubectl as _kubectl
@@ -190,6 +191,8 @@ def deploy(args, log):
 
     log.info("Created Services, waiting for deployment to become available")
 
+    # cleanup
+    shutil.rmtree(tdir, ignore_errors=True)
     return 0
 
 
