@@ -38,3 +38,7 @@ coverage.out
 vendor
 vendor/*
 dep-prep
+*.pyc
+.cache/*
+__pycache__/*
+.cache
