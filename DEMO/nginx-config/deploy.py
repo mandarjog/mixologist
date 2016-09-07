@@ -3,6 +3,7 @@ import json
 import string
 import os
 import tempfile
+import urlparse
 
 import sh
 from sh import kubectl as _kubectl
@@ -25,8 +26,9 @@ def get_args():
     argp = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
-    argp.add_argument("--namespace", required=True,
-                      help="kubernetes namespace")
+    argp.add_argument("--namespace", 
+                      default=os.getenv("NAMESPACE"),
+                      help="kubernetes namespace or set NAMESPACE=")
     argp.add_argument("--MIXOLOGIST-IMAGE", default=DEPLOY_MAP["MIXOLOGIST_IMAGE"],
                       help="Mixologist Docker image")
     argp.add_argument("--BOOKSTORE-IMAGE", default=DEPLOY_MAP["BOOKSTORE_IMAGE"],
@@ -39,9 +41,13 @@ def get_args():
                       default=THIS_DIR + "/mixologist_bookstore_demo.yml")
     argp.add_argument("--service-json-template", help="template for api service",
                       default=THIS_DIR + "/bookstore.json")
-
+    argp.add_argument("--dns", help="dns server used by ESP. default: kube-dns")
     return argp
 
+
+def validate_args(parser, args):
+    if args.namespace is None:
+        parser.error("--namespace is required if NAMESPACE variable is not set")
 
 class KubeCtl(object):
 
@@ -97,6 +103,15 @@ class KubeCtl(object):
     def create(self, ymlfile):
         return self._cmd_("create -f " + ymlfile + " --validate=false", js=False)
 
+    def get_cluster_dns(self):
+        op = self._cmd_("get svc kube-dns --namespace kube-system", ns=False)
+        return op["spec"]["clusterIP"]
+
+    def get_svc_endpoint(self, svc):
+        spec = self._cmd_("get svc "+svc)["spec"]
+        return "{}:{}".format(
+            spec["clusterIP"],
+            spec["ports"][0]["port"])
 
 def process_template(inputfile, outputfile, varmap):
     with open(inputfile, 'rt') as fl:
@@ -112,6 +127,21 @@ def deploy(args):
 
     # hydrate templates with the given info
     varmap = {k: args.__dict__[k] for k in DEPLOY_MAP}
+    varmap["dns"] = args.dns or kubectl.get_cluster_dns()
+    
+    url = urlparse.urlparse(varmap["servicecontrol"])
+    if '.' not in url.hostname:
+        # ensure that service control uses fqdn
+        scheme = url.scheme or "http"
+        varmap["servicecontrol"] = \
+            "{scheme}://{host}.{namespace}.svc.cluster.local:{port}".format(
+                scheme=scheme,
+                host=url.hostname,
+                namespace=args.namespace,
+                port=url.port)
+
+    print "using", varmap
+
     tdir = tempfile.mkdtemp("mixologist-deploy")
     kube_yml = tdir + "/kube.yml"
     service_json = tdir + "/bookstore.json"
@@ -130,8 +160,16 @@ def deploy(args):
     kubectl.create(kube_yml)
 
 
+    # This should really work, 
+    # working around ESP dns issue
+    # ESP is unable to resolve the symbolic name of service control
+
+
+
 def main(argv):
-    args = get_args().parse_args(argv)
+    argp = get_args()
+    args = argp.parse_args(argv)
+    validate_args(argp, args)
     return deploy(args)
 
 
