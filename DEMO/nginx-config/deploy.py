@@ -13,7 +13,7 @@ THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 DEPLOY_MAP = {
     "BOOKSTORE_IMAGE": "gcr.io/mixologist-142215/bookstore-mixologist",
     "MIXOLOGIST_IMAGE": "gcr.io/mixologist-142215/mixologist",
-    "servicecontrol": "mixologist:9092",
+    "servicecontrol": "http://mixologist:9092/",
     "ESP_IMAGE": "gcr.io/mixologist-142215/endpoints-runtime"
     # afte esp is realsed the above should change to
     # b.gcr.io/endpoints/endpoints-runtime
