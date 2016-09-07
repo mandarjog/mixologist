@@ -45,7 +45,6 @@ def get_args():
     argp.add_argument("--dns", help="dns server used by ESP. default: kube-dns")
     argp.add_argument("--force-delete-namespace", help="Delete namespace if it already exists", action="store_true", default=False)
     argp.add_argument("-v", type=int, help="verbosity", default=1)
-    argp.add_argument("-vmodule", help="verbosity of modules")
     return argp
 
 
@@ -77,6 +76,10 @@ class KubeCtl(object):
 
     def pods(self):
         return(self._cmd_("get pods"))
+
+    def delete_namespace(self):
+        self.l.info("delete_namespace() "+self.namespace)
+        return self._cmd_("delete namespace " + self.namespace, js=False)
 
     def create_namespace(self):
         self.l.info("create_namespace() "+self.namespace)
@@ -132,6 +135,9 @@ def process_template(inputfile, outputfile, varmap):
 
 def deploy(args, log):
     kubectl = KubeCtl(args.namespace, log)
+
+    if args.force_delete_namespace:
+        kubectl.delete_namespace()
     # check / create namespace
     kubectl.create_namespace()
 
@@ -181,9 +187,6 @@ def deploy(args, log):
 def main(argv):
     argp = get_args()
     args = argp.parse_args(argv)
-    logargs = ["-v", str(args.v)]
-    if args.vmodule:
-        logargs += ["-vmodule", args.vmodule]
     FORMAT = '[%(asctime)s] p%(process)s {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s'
     logging.basicConfig(format=FORMAT)
     log = logging.getLogger("deploy")
