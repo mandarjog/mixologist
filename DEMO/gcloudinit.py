@@ -33,6 +33,7 @@ def get_gcloud(log):
 
 def gcloudinit(args, log):
     gcloud = get_gcloud(log)
+    gcloud("components install kubectl")
     gcloud("config set project {}".format(args.project))
     gcloud("config set compute/zone us-central1-b")
     if args.project == 'mixologist-142215' and\
@@ -43,8 +44,7 @@ def gcloudinit(args, log):
 
     gcloud("config set container/cluster {}".format(args.cluster_name))
     gcloud("container clusters get-credentials {}".format(args.cluster_name))
- 
-     
+
 def main(argv):
     argp = get_args()
     args = argp.parse_args(argv)
