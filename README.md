@@ -31,3 +31,11 @@ Update code and redeploy
 5. Make code changes  --- 
 6. run: make dev-redeploy
   This assumes you have already run dev-deploy
+
+
+Notes
+-----
+1. The demo uses a slightly modified version of the bookstore app
+   DEMO/bookstore
+2. To build
+   docker build -t gcr.io/mjog-1470410002014/bookstore-mixologist -f bookstore.Dockerfile .
