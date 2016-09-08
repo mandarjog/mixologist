@@ -91,6 +91,10 @@ spec:
       containers:
       - name: mixologist
         image: ${MIXOLOGIST_IMAGE}
+        args: [
+          "-v=2",
+          "-logtostderr=true"
+        ]
         ports:
           - containerPort: 9092
 

@@ -4,6 +4,9 @@ import cStringIO
 import re
 import socket
 
+
+
+# This is somewhat nginx.conf specific, but could be generalized
 namesre = re.compile("(.*)(http(s){0,1})://(\S*)(\s*);(.*)")
 
 
@@ -28,7 +31,11 @@ class DNSLine(object):
 
 class DNSResolver(object):
     def resolve(self, name):
-        return socket.gethostbyname(name)
+        try:
+            return socket.gethostbyname(name)
+        except socket.gaierror as se:
+            print se
+            return name
 
 class Cfg(object):
 
@@ -104,8 +111,20 @@ def _parse_config(fileobj, start_markers=None):
     return cfg
 
 
-def main():
-    pass
+def get_args():
+    import argparse
+    argp = argparse.ArgumentParser()
+    argp.add_argument("--timeout", type=int, default=900, help="timeout in seconds, process will exit if there is no change")
+    argp.add_argument("--poll-interval", type=int, default=30, help="poll interval in seconds")
+    argp.add_argument("--exit-code-on-change", type=int, default=2, help="Process will exit with this exit code if")
+    argp.add_argument("-c", required=True, help="source nginx conf file, conf directory should be writable")
+    argp.add_argument("-d", required=True, help="destination nginx conf file, same directory as source nginx.conf")
+
+    return argp
+
+
+def main(argv):
+    args = get_args().parse_args(argv)
 
 
 if __name__ == "__main__":

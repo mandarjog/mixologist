@@ -50,7 +50,7 @@ type ExponentialDistribution struct {
 }
 
 type prometheusConsumer struct {
-	ReportQueue      chan sc.ReportRequest
+	ReportQueue      chan *sc.ReportRequest
 	MetricSummaryMap map[string]*prometheus.SummaryVec
 	ProducerMetrics  map[string]interface{}
 }
@@ -147,7 +147,7 @@ func NewPrometheusConsumer() ReportConsumer {
 	}
 }
 
-func (p *prometheusConsumer) SetReportQueue(ch chan sc.ReportRequest) {
+func (p *prometheusConsumer) SetReportQueue(ch chan *sc.ReportRequest) {
 	p.ReportQueue = ch
 }
 

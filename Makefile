@@ -1,3 +1,5 @@
+DEV_REPO := gcr.io/$(PROJECT_ID)/mixologist-$(USER)
+
 all: build
 
 proto:
@@ -57,6 +59,28 @@ docker: build clean
 docker-run:
 	docker run -d -p 9092:9092 mixologist -v=1  -logtostderr=true
 
+check-env:
+ifndef PROJECT_ID
+	$(error PROJECT_ID is undefined)
+endif
+ifndef NAMESPACE
+	$(error NAMESPACE is undefined)
+endif
+
+dev-build: check-env build clean
+	@echo "Building $(DEV_REPO)"
+	docker build -t $(DEV_REPO) .
+	gcloud docker push $(DEV_REPO)
+
+dev-deploy: dev-build
+	DEMO/deploy.py --namespace $(NAMESPACE) --MIXOLOGIST-IMAGE $(DEV_REPO)
+
+#TODO change this to deployments and replica sets
+# then we can use rolling updates
+dev-redeploy: dev-build
+	kubectl --namespace $(NAMESPACE) scale --replicas=0 rc/mixologist
+	kubectl --namespace $(NAMESPACE) scale --replicas=1 rc/mixologist
+
 
 .PHONY: \
 	all \
@@ -68,4 +92,8 @@ docker-run:
 	build \
 	run \
 	docker \
-	docker-run
+	docker-run \
+	dev-build \
+	dev-deploy \
+	dev-redeploy \
+	check-env
