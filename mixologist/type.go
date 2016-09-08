@@ -37,7 +37,7 @@ type (
 	// ControllerImpl -- The controller that is implemented by framework itself
 	// It delelegates the actual work to a the *real* ServiceControllerServer
 	ControllerImpl struct {
-		ReportQueue chan sc.ReportRequest
+		ReportQueue chan *sc.ReportRequest
 	}
 
 	// ReportConsumer -- components that wish to consume ReportRequest messages
@@ -45,7 +45,7 @@ type (
 	ReportConsumer interface {
 		// Set consumer channel, this channel should be emptied by the
 		// implementation
-		SetReportQueue(chan sc.ReportRequest)
+		SetReportQueue(chan *sc.ReportRequest)
 		// Start consuming from the channel
 		Start()
 		// Stop Processing

@@ -9,7 +9,7 @@ import (
 )
 
 type prometheusConsumer struct {
-	ReportQueue      chan sc.ReportRequest
+	ReportQueue      chan *sc.ReportRequest
 	MetricSummaryMap map[string]*prometheus.SummaryVec
 }
 
@@ -40,7 +40,7 @@ func NewPrometheusConsumer() ReportConsumer {
 	}
 }
 
-func (p *prometheusConsumer) SetReportQueue(ch chan sc.ReportRequest) {
+func (p *prometheusConsumer) SetReportQueue(ch chan *sc.ReportRequest) {
 	p.ReportQueue = ch
 }
 
