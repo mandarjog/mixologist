@@ -1,0 +1,7 @@
+This is a slightly modified version of the bookstore app.
+
+TODO:
+Replicate it with something better
+
+Source: //esp/test/bookstore
+Changes: Add a random sleep to /shelves request
