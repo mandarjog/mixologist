@@ -1,10 +1,10 @@
-hash: fbe3dff8bdb2d0bf62ac1ffe069cc9a34fe9497ca45480d98ffea6de37e8f63f
-updated: 2016-08-23T13:08:23.485763632-07:00
+hash: e142ec48556fbc49c75a813116501750b23519588a7b6cfd5748b37e7330c103
+updated: 2016-09-07T16:58:24.653632353-07:00
 imports:
 - name: github.com/golang/glog
   version: 23def4e6c14b4da8ac2ed8007337bc5eb5007998
 - name: github.com/golang/protobuf
-  version: f592bd283e9ef86337a432eb50e592278c3d534d
+  version: 1f49d83d9aa00e6ce4fc8258c71cc7786aec968a
   subpackages:
   - proto
   - ptypes/any
@@ -16,10 +16,17 @@ imports:
   version: 462326b1628e124b23f42e87a8f2750e3c4e2d24
   subpackages:
   - ginkgo
+- name: github.com/onsi/gomega
+  version: a78ae492d53aad5a7a232d0d0462c14c400e3ee7
+- name: github.com/prometheus/client_golang
+  version: ea6e1db4cb8127eeb0b6954f7320363e5451820f
+  subpackages:
+  - prometheus
+  - prometheus/promhttp
 - name: golang.org/x/net
-  version: 7394c112eae4dba7e96bfcfe738e6373d61772b4
+  version: 9313baa13d9262e49d07b20ed57dceafcd7240cc
   subpackages:
   - context
 - name: google/api/servicecontrol/v1
   version: ""
-testImports: []
+devImports: []
