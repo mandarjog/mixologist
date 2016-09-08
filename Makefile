@@ -78,8 +78,8 @@ dev-deploy: dev-build
 #TODO change this to deployments and replica sets
 # then we can use rolling updates
 dev-redeploy: dev-build
-	kubectl --namespace $(NAMESPACE) scale --replicas=0 rc/esp
-	kubectl --namespace $(NAMESPACE) scale --replicas=1 rc/esp
+	kubectl --namespace $(NAMESPACE) scale --replicas=0 rc/mixologist
+	kubectl --namespace $(NAMESPACE) scale --replicas=1 rc/mixologist
 
 
 .PHONY: \
