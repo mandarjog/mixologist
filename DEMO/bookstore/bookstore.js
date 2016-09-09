@@ -31,7 +31,6 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var swaggerTools = require('swagger-tools');
-var sleep = require('sleep');
 
 /**
  * @typedef {Object} InitializationOptions
@@ -73,8 +72,9 @@ function bookstore(options) {
   // Echo method for stress test.
   function echo(req, res) {
     echoCount += 1;
-    sleep.usleep(100000 + Math.floor(Math.random() * 300000));
-    res.status(200).json(req.body);
+    setTimeout(function(res, body) {
+      res.status(200).json(body)
+    }, 500 + Math.floor(Math.random() * 3000), res, req.body);
   }
 
   app.all('/echo', echo);
@@ -127,7 +127,6 @@ function bookstore(options) {
   }
 
   function getShelf(name) {
-    sleep.usleep(100000 + Math.floor(Math.random() * 300000));
     return bookstoreDatabase.shelves[name];
   }
 
@@ -218,6 +217,16 @@ function bookstore(options) {
     });
   });
 
+  
+
+  // setup middleware to introduce random delay based on distribution
+  app.use(function(req,res,next){
+    // setup distribution
+    var beta = Math.pow(Math.sin(Math.random()*Math.PI/2), 2);
+    var beta_left = (beta < 0.5) ? 2*beta : 2*(1-beta);
+    setTimeout(next, beta_left * (Math.random() * 800));
+  });
+
   app.get('/shelves', function(req, res) {
     var shelves = bookstoreDatabase.shelves;
     var result = [];
@@ -228,7 +237,6 @@ function bookstore(options) {
         theme: shelf.theme
       });
     }
-    sleep.usleep(100000 + Math.floor(Math.random() * 300000));
     res.status(200).json({
       shelves: result
     });
