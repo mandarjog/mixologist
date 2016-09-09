@@ -11,43 +11,15 @@ import (
 )
 
 const (
-	ProducerRequestCount              = "serviceruntime.googleapis.com/api/producer/request_count"
-	ProducerRequestSizes              = "serviceruntime.googleapis.com/api/producer/request_sizes"
-	ProducerTotalLatencies            = "serviceruntime.googleapis.com/api/producer/total_latencies"
-	ProducerBackendLatencies          = "serviceruntime.googleapis.com/api/producer/backend_latencies"
-	ProducerTopRequestCountByConsumer = "serviceruntime.googleapis.com/api/producer/top_request_count_by_consumer"
-	CloudProject                      = "cloud.googleapis.com/project"
-	CloudLocation                     = "cloud.googleapis.com/location"
-	CloudService                      = "cloud.googleapis.com/service"
-	CloudUid                          = "cloud.googleapis.com/uid"
-	ApiVersion                        = "serviceruntime.googleapis.com/api_version"
-	ApiMethod                         = "serviceruntime.googleapis.com/api_method"
-	ConsumerProject                   = "serviceruntime.googleapis.com/consumer_project"
-	Protocol                          = "/protocol"
-	ResponseCode                      = "/response_code"
-	ResponseCodeClass                 = "/response_code_class"
-	StatusCode                        = "/status_code"
-	ConsumerId                        = "/consumer_id"
+	missingLabelValue = "UNKNOWN"
 )
 
 var (
-	SizeDistribution     = &ExponentialDistribution{NumBuckets: 8, StartValue: 1, GrowthFactor: 10}
-	TimeDistribution     = &ExponentialDistribution{NumBuckets: 8, StartValue: 1e-6, GrowthFactor: 10}
-	SizeHistogramBuckets = prometheus.ExponentialBuckets(1, 10, 8)
-	TimeHistogramBuckets = prometheus.ExponentialBuckets(1e-6, 10, 8)
-	ApiResourceLabels    = []string{CloudLocation, CloudUid, ApiVersion, ApiMethod, ConsumerProject, CloudProject, CloudService}
+	sizeHistogramBuckets = prometheus.ExponentialBuckets(1, 10, 8)
+	timeHistogramBuckets = prometheus.ExponentialBuckets(1e-6, 10, 8)
+	histogramLabelNames  = prometheusSafeNames(MonitoredAPIResourceLabels)
 	slashReplacer        = strings.NewReplacer("/", "_", ".", "_")
-	supportedLabels      = map[string][]string{
-		ProducerRequestCount:              []string{Protocol, ResponseCode, ResponseCodeClass, StatusCode},
-		ProducerTopRequestCountByConsumer: []string{Protocol, ResponseCode, ConsumerId, StatusCode},
-	}
 )
-
-type ExponentialDistribution struct {
-	NumBuckets   int32
-	StartValue   float64
-	GrowthFactor float64
-}
 
 type prometheusConsumer struct {
 	ReportQueue      chan *sc.ReportRequest
@@ -91,7 +63,7 @@ func newCounterVec(name, desc string, labels ...string) *prometheus.CounterVec {
 			Name: prometheusSafeName(name),
 			Help: desc,
 		},
-		prometheusSafeNames(append(ApiResourceLabels, labels...)),
+		append(histogramLabelNames, prometheusSafeNames(labels)...),
 	)
 	prometheus.MustRegister(c)
 	return c
@@ -103,9 +75,9 @@ func newTimeHistogramVec(name, desc string) *prometheus.HistogramVec {
 		prometheus.HistogramOpts{
 			Name:    prometheusSafeName(name),
 			Help:    desc,
-			Buckets: TimeHistogramBuckets,
+			Buckets: timeHistogramBuckets,
 		},
-		prometheusSafeNames(ApiResourceLabels),
+		histogramLabelNames,
 	)
 	prometheus.MustRegister(c)
 	return c
@@ -117,9 +89,9 @@ func newSizeHistogramVec(name, desc string) *prometheus.HistogramVec {
 		prometheus.HistogramOpts{
 			Name:    prometheusSafeName(name),
 			Help:    desc,
-			Buckets: SizeHistogramBuckets,
+			Buckets: sizeHistogramBuckets,
 		},
-		prometheusSafeNames(ApiResourceLabels),
+		histogramLabelNames,
 	)
 	prometheus.MustRegister(c)
 	return c
@@ -127,11 +99,11 @@ func newSizeHistogramVec(name, desc string) *prometheus.HistogramVec {
 
 func producerMetrics() map[string]interface{} {
 	m := map[string]interface{}{
-		ProducerRequestCount:              newCounterVec(ProducerRequestCount, "Request Count", supportedLabels[ProducerRequestCount]...),
-		ProducerTotalLatencies:            newTimeHistogramVec(ProducerTotalLatencies, "Total latencies"),
-		ProducerBackendLatencies:          newTimeHistogramVec(ProducerBackendLatencies, "Backend latencies"),
-		ProducerRequestSizes:              newSizeHistogramVec(ProducerRequestSizes, "Request Sizes"),
-		ProducerTopRequestCountByConsumer: newCounterVec(ProducerTopRequestCountByConsumer, "Request Count By Consumer", supportedLabels[ProducerTopRequestCountByConsumer]...),
+		ProducerRequestCount:           newCounterVec(ProducerRequestCount, "Request Count", PerMetricLabels[ProducerRequestCount]...),
+		ProducerTotalLatencies:         newTimeHistogramVec(ProducerTotalLatencies, "Total latencies"),
+		ProducerBackendLatencies:       newTimeHistogramVec(ProducerBackendLatencies, "Backend latencies"),
+		ProducerRequestSizes:           newSizeHistogramVec(ProducerRequestSizes, "Request Sizes"),
+		ProducerRequestCountByConsumer: newCounterVec(ProducerRequestCountByConsumer, "Request Count By Consumer", PerMetricLabels[ProducerRequestCountByConsumer]...),
 	}
 	return m
 }
@@ -153,6 +125,9 @@ func (p *prometheusConsumer) SetReportQueue(ch chan *sc.ReportRequest) {
 
 func buildLabels(defaults map[string]string, m *sc.MetricValue) prometheus.Labels {
 	l := prometheus.Labels{}
+	for _, k := range MonitoredAPIResourceLabels {
+		l[prometheusSafeName(k)] = missingLabelValue
+	}
 	for k, v := range defaults {
 		l[prometheusSafeName(k)] = v
 	}
@@ -197,6 +172,16 @@ func populateFromBuckets(hist prometheus.Histogram, dist *sc.Distribution, ed *E
 	}
 }
 
+func filter(src prometheus.Labels, metricLabels []string) prometheus.Labels {
+	filteredLabels := prometheus.Labels{}
+	for _, k := range metricLabels {
+		if v, ok := src[k]; ok {
+			filteredLabels[k] = v
+		}
+	}
+	return filteredLabels
+}
+
 func addObservation(h *prometheus.HistogramVec, l prometheus.Labels, mv *sc.MetricValue, name string) {
 	d := mv.GetDistributionValue()
 	if d == nil {
@@ -205,10 +190,10 @@ func addObservation(h *prometheus.HistogramVec, l prometheus.Labels, mv *sc.Metr
 	switch name {
 	case ProducerTotalLatencies, ProducerBackendLatencies:
 		// time buckets
-		populateFromBuckets(h.With(l), d, TimeDistribution, TimeHistogramBuckets)
+		populateFromBuckets(h.With(filter(l, histogramLabelNames)), d, TimeDistribution, timeHistogramBuckets)
 	case ProducerRequestSizes:
 		// size buckets
-		populateFromBuckets(h.With(l), d, SizeDistribution, SizeHistogramBuckets)
+		populateFromBuckets(h.With(filter(l, histogramLabelNames)), d, SizeDistribution, sizeHistogramBuckets)
 	default:
 		glog.Warningf("unknown metric for distribution: %s", name)
 	}
@@ -220,7 +205,18 @@ func (p *prometheusConsumer) process(mvs *sc.MetricValueSet, defaultLabels map[s
 			labels := buildLabels(defaultLabels, mv)
 			switch t := m.(type) {
 			case *prometheus.CounterVec:
-				t.With(labels).Add(float64(mv.GetInt64Value()))
+
+				// need to ensure proper label cardinality
+				filteredLabels := filter(labels, histogramLabelNames)
+				for _, k := range PerMetricLabels[mvs.MetricName] {
+					if v, ok := labels[prometheusSafeName(k)]; ok {
+						filteredLabels[prometheusSafeName(k)] = v
+					} else {
+						filteredLabels[prometheusSafeName(k)] = missingLabelValue
+					}
+				}
+
+				t.With(filteredLabels).Add(float64(mv.GetInt64Value()))
 			case *prometheus.HistogramVec:
 				addObservation(t, labels, mv, mvs.MetricName)
 			}
@@ -236,7 +232,7 @@ func (p *prometheusConsumer) consumerLoop() {
 		for _, oprn := range reportMsg.GetOperations() {
 			defaultLabels := oprn.GetLabels()
 			defaultLabels[CloudService] = service
-			defaultLabels[ConsumerId] = oprn.ConsumerId
+			defaultLabels[ConsumerID] = oprn.ConsumerId
 
 			for _, mvs := range oprn.GetMetricValueSets() {
 				p.process(mvs, defaultLabels)
