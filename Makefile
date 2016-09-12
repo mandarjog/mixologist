@@ -29,6 +29,7 @@ dep-prep:
 test: mixologist-bin
 	go test -v -cpu 1,4 ./mixologist/...
 	go test -v -race -cpu 1,4 ./mixologist/...  
+	./script/coverage.sh 
 
 clean:
 	go clean -i ./... 
@@ -85,7 +86,6 @@ dev-redeploy: dev-build
 	all \
 	proto \
 	test \
-	testrace \
 	clean \
 	coverage \
 	build \
