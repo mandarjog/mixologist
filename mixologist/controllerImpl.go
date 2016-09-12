@@ -11,7 +11,6 @@ func (c *ControllerImpl) Check(ctx context.Context, msg *sc.CheckRequest) (*sc.C
 	resp := &sc.CheckResponse{
 		OperationId: msg.Operation.OperationId,
 		// CheckErrors: []*sc.CheckError{&sc.CheckError{sc.CheckError_PERMISSION_DENIED, sc.CheckError_BUDGET_EXCEEDED.String()}},
-		CheckErrors: []*sc.CheckError{},
 	}
 	return resp, nil
 }
