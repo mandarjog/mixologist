@@ -73,7 +73,6 @@ spec:
     name: mixologist
   selector:
     app: mixologist
-  type: LoadBalancer
 ----
 apiVersion: v1
 kind: ReplicationController
@@ -142,6 +141,40 @@ spec:
         - mountPath: /tmp/prometheus
           name: prometheus-config
           readOnly: true
+
+# grafana
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+spec:
+  ports:
+  - port: 3000
+    protocol: TCP
+    name: grafana
+  selector:
+    app: grafana
+  type: LoadBalancer
+----
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: grafana
+spec:
+  replicas: 1
+  selector:
+    app: grafana
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      containers:
+      - name: grafana
+        image: grafana/grafana
+        ports:
+          - containerPort: 3000
 
 # ESP
 ---

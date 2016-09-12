@@ -12,14 +12,12 @@ from sh import kubectl as _kubectl
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 
-
+# gcr.io/kubernetes-hello-world-1385/bookstore
 DEPLOY_MAP = {
     "BOOKSTORE_IMAGE": "gcr.io/mixologist-142215/bookstore-mixologist",
     "MIXOLOGIST_IMAGE": "gcr.io/mixologist-142215/mixologist",
     "servicecontrol": "http://mixologist:9092/",
-    "ESP_IMAGE": "gcr.io/mixologist-142215/endpoints-runtime"
-    # afte esp is realsed the above should change to
-    # b.gcr.io/endpoints/endpoints-runtime
+    "ESP_IMAGE": "b.gcr.io/endpoints/endpoints-runtime:0.3"
 }
 
 
