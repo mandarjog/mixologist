@@ -31,8 +31,8 @@ type (
 
 	// Handler -- Main handler and the handler map
 	Handler struct {
-		Server     ServiceControllerServer
-		HandlerMap map[string]http.Handler
+		Server         ServiceControllerServer
+		ReportHandlers []*PrefixAndHandler
 	}
 	// ControllerImpl -- The controller that is implemented by framework itself
 	// It delelegates the actual work to a the *real* ServiceControllerServer
@@ -40,18 +40,33 @@ type (
 		ReportQueue chan *sc.ReportRequest
 	}
 
+	// ReportConsumerManagerImpl -- store consumer manager config/state
+	ReportConsumerManagerImpl struct {
+		reportQueue chan *sc.ReportRequest
+		consumers   []ReportConsumer
+	}
+	// PrefixAndHandler -- as the name suggests, returned by consumers if they wish to have
+	// a listener
+	PrefixAndHandler struct {
+		Prefix  string
+		Handler http.Handler
+	}
+
 	// ReportConsumer -- components that wish to consume ReportRequest messages
-	// implement this interface. They are expected to read from the ReportRequest channel
 	ReportConsumer interface {
-		// Set consumer channel, this channel should be emptied by the
-		// implementation
-		SetReportQueue(chan *sc.ReportRequest)
-		// Start consuming from the channel
-		Start()
-		// Stop Processing
-		Stop()
+		// GetName -- name of this consumer
+		GetName() string
+		// Consume report
+		Consume(*sc.ReportRequest) error
 		// Get path mapping and handler
 		// can return nil
-		GetPrefixAndHandler() (string, http.Handler)
+		GetPrefixAndHandler() *PrefixAndHandler
+	}
+
+	//ReportConsumerBuilder -- Every report consumer should register its builder
+	// in the init method
+	ReportConsumerBuilder interface {
+		// Given an arbitrary map create a new consumer
+		New(map[string]interface{}) ReportConsumer
 	}
 )

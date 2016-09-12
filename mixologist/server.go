@@ -11,18 +11,12 @@ import (
 )
 
 // NewHandler -- return a handler with initialized handler map
-func NewHandler(server ServiceControllerServer) *Handler {
+func NewHandler(server ServiceControllerServer, hh []*PrefixAndHandler) *Handler {
 	return &Handler{
-		Server:     server,
-		HandlerMap: make(map[string]http.Handler),
+		Server:         server,
+		ReportHandlers: hh,
 	}
 
-}
-
-// AddHandler -- Add a handler for prefixes, unsed for services like
-// prometheus
-func (h *Handler) AddHandler(prefix string, hh http.Handler) {
-	h.HandlerMap[prefix] = hh
 }
 
 // Perform common preamble during message specific processing
@@ -89,9 +83,9 @@ func (h *Handler) getServerFn(w http.ResponseWriter, r *http.Request) serverFn {
 // Implement Handler API
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// check for registered handlers
-	for prefix, hh := range h.HandlerMap {
-		if strings.HasPrefix(r.RequestURI, prefix) {
-			hh.ServeHTTP(w, r)
+	for _, ph := range h.ReportHandlers {
+		if strings.HasPrefix(r.RequestURI, ph.Prefix) {
+			ph.Handler.ServeHTTP(w, r)
 			return
 		}
 	}

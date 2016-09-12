@@ -42,11 +42,12 @@ coverage: build
 mixologist-bin: dep-prep main.go mixologist/*.go
 	go build -o mixologist-bin main.go
 
-build: mixologist-bin main.go mixologist/*.go
+build: mixologist-bin main.go mixologist/*.go mixologist/rc/prometheus/*.go 
 	go vet main.go 
 	golint main.go 
 	go vet mixologist/*.go
-	golint mixologist/*.go
+	go vet mixologist/rc/prometheus/*.go
+	golint mixologist/...
 
 
 run: mixologist-bin
