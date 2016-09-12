@@ -42,3 +42,4 @@ dep-prep
 .cache/*
 __pycache__/*
 .cache
+.cover/*

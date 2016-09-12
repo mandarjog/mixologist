@@ -28,16 +28,14 @@ dep-prep:
 
 test: mixologist-bin
 	go test -v -cpu 1,4 ./mixologist/...
-
-testrace: test
-	go test -v -race -cpu 1,4 ./mixologist/...  -coverprofile=coverage.out
+	go test -v -race -cpu 1,4 ./mixologist/...  
 
 clean:
 	go clean -i ./... 
 	rm -f mixologist-bin
 
 coverage: build
-	./coverage.sh --coveralls
+	./script/coverage.sh --html
 
 mixologist-bin: dep-prep main.go mixologist/*.go
 	go build -o mixologist-bin main.go
