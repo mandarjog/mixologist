@@ -1,5 +1,5 @@
-hash: e142ec48556fbc49c75a813116501750b23519588a7b6cfd5748b37e7330c103
-updated: 2016-08-24T08:22:40.605300124-07:00
+hash: c736f1dbc581c7cc7f11d33896cf74930b3491a7a4dfd71c1b8a79c5061a6ab1
+updated: 2016-09-12T12:05:33.852180103-07:00
 imports:
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
@@ -25,11 +25,12 @@ imports:
   subpackages:
   - ginkgo
 - name: github.com/onsi/gomega
-  version: a78ae492d53aad5a7a232d0d0462c14c400e3ee7
+  version: d59fa0ac68bb5dd932ee8d24eed631cdd519efc3
 - name: github.com/prometheus/client_golang
   version: c5b7fccd204277076155f10851dad72b76a49317
   subpackages:
   - prometheus
+  - prometheus/promhttp
 - name: github.com/prometheus/client_model
   version: fa8ad6fec33561be4280a8f0514318c79d7f6cb6
   subpackages:
@@ -46,4 +47,6 @@ imports:
   version: 7394c112eae4dba7e96bfcfe738e6373d61772b4
   subpackages:
   - context
+- name: gopkg.in/yaml.v2
+  version: 31c299268d302dd0aa9a0dcf765a3d58971ac83f
 testImports: []
