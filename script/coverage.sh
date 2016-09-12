@@ -8,7 +8,7 @@
 #
 #     --html      Additionally create HTML report and open it in browser
 #     --coveralls Push coverage statistics to coveralls.io
-#
+# @src: https://github.com/mlafeldt/chef-runner/blob/v0.7.0/script/coverage
 set -e
 
 workdir=.cover
