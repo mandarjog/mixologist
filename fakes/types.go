@@ -1,16 +1,26 @@
 package fakes
 
 import (
-	sc "google/api/servicecontrol/v1"
+	"container/list"
+	"somnacin-internal/mixologist/mixologist"
+	"sync"
 )
 
 type (
 	consumer struct {
-		name string
-		meta map[string]interface{}
-		msgs []*sc.ReportRequest
+		name    string
+		meta    map[string]interface{}
+		Msgs    *list.List
+		handler *mixologist.PrefixAndHandler
+		lock    *sync.Mutex
 	}
 	builder struct {
-		name string
+		name     string
+		meta     map[string]interface{}
+		Consumer *consumer
+	}
+
+	handler struct {
+		prefix string
 	}
 )

@@ -67,6 +67,6 @@ type (
 	// in the init method
 	ReportConsumerBuilder interface {
 		// Given an arbitrary map create a new consumer
-		New(map[string]interface{}) ReportConsumer
+		NewConsumer(map[string]interface{}) ReportConsumer
 	}
 )

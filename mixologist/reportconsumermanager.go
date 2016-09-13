@@ -11,7 +11,7 @@ func NewReportConsumerManager(rq chan *sc.ReportRequest, registry map[string]Rep
 	for _, consumerName := range consumers {
 		if cn, ok := registry[consumerName]; ok {
 			//TODO pass map params to cn.New
-			consumerImpls = append(consumerImpls, cn.New(nil))
+			consumerImpls = append(consumerImpls, cn.NewConsumer(nil))
 		}
 	}
 	return &ReportConsumerManagerImpl{

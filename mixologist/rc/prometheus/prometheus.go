@@ -248,7 +248,7 @@ func (p *prometheusConsumer) GetPrefixAndHandler() *mixologist.PrefixAndHandler 
 
 /* Implements ReportConsumerBuilder */
 // New -- Returns a new prometheus consumer
-func (s *builder) New(meta map[string]interface{}) mixologist.ReportConsumer {
+func (s *builder) NewConsumer(meta map[string]interface{}) mixologist.ReportConsumer {
 	return &prometheusConsumer{
 		MetricSummaryMap: getMetricsMap([][]string{
 			[]string{"request_latency_in_ms", "http_request_duration_microseconds"},
