@@ -16,7 +16,7 @@ func main() {
 	flag.IntVar(&nConsumers, "nConsumers", mixologist.NConsumers, "nConsumers")
 	controller := mixologist.NewControllerImpl()
 	flag.Parse()
-	rcMgr := mixologist.NewReportConsumerManager(controller.ReportQueue, mixologist.ReportConsumerRegistry, []string{prometheus.Name})
+	rcMgr := mixologist.NewReportConsumerManager(controller.ReportQueue(), mixologist.ReportConsumerRegistry, []string{prometheus.Name})
 	handler := mixologist.NewHandler(controller, rcMgr.GetPrefixAndHandlers())
 	addr := ":" + strconv.Itoa(port)
 	srv := http.Server{
