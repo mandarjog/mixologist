@@ -16,7 +16,7 @@ var _ = gn.Describe("ControllerImpl", func() {
 	gn.Describe("Given: NewControllerImpl()", func() {
 		gn.Context("when: called", func() {
 			gn.It("then: return a valid ControllerImpl object", func() {
-				g.Expect(ctrl.ReportQueue).ShouldNot(g.BeNil())
+				g.Expect(ctrl.ReportQueue()).ShouldNot(g.BeNil())
 			})
 		})
 	})
@@ -30,7 +30,7 @@ var _ = gn.Describe("ControllerImpl", func() {
 				var req *sc.ReportRequest
 				wg.Add(1)
 				go func() {
-					req = <-ctrl.ReportQueue
+					req = <-ctrl.ReportQueue()
 					wg.Done()
 				}()
 

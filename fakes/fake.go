@@ -2,7 +2,9 @@ package fakes
 
 import (
 	"container/list"
+	"crypto/rand"
 	"fmt"
+	"golang.org/x/net/context"
 	sc "google/api/servicecontrol/v1"
 	"net/http"
 	"somnacin-internal/mixologist/mixologist"
@@ -22,6 +24,16 @@ func NewBuilder(name string, meta map[string]interface{}) *builder {
 	return bldr
 }
 
+func BuildPrefixAndHandler(prx string) *mixologist.PrefixAndHandler {
+	return &mixologist.PrefixAndHandler{
+		Prefix: prx,
+		Handler: &handler{
+			prefix: prx,
+		},
+	}
+
+}
+
 // ReportConsumerBuilder
 func (s *builder) NewConsumer(meta map[string]interface{}) mixologist.ReportConsumer {
 	var prefixAndHandler *mixologist.PrefixAndHandler
@@ -30,13 +42,7 @@ func (s *builder) NewConsumer(meta map[string]interface{}) mixologist.ReportCons
 	}
 	if _prx, found := meta[HandlerPrefix]; found {
 		prx := _prx.(string)
-		prefixAndHandler = &mixologist.PrefixAndHandler{
-			Prefix: prx,
-			Handler: &handler{
-				prefix: prx,
-			},
-		}
-
+		prefixAndHandler = BuildPrefixAndHandler(prx)
 	}
 	s.Consumer = &consumer{
 		name:    s.name,
@@ -61,6 +67,12 @@ func (s *consumer) Consume(reportMsg *sc.ReportRequest) error {
 	return nil
 }
 
+func UUID() string {
+	b := make([]byte, 16)
+	rand.Read(b)
+	return fmt.Sprintf("%X-%X-%X-%X-%X", b[0:4], b[4:6], b[6:8], b[8:10], b[10:])
+}
+
 // returns messages that have been queued
 func (s *consumer) GetMessages() []*sc.ReportRequest {
 	s.lock.Lock()
@@ -79,5 +91,30 @@ func (s *consumer) GetPrefixAndHandler() *mixologist.PrefixAndHandler {
 }
 
 func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello %s", h.prefix)
+	fmt.Fprintf(w, "%s", h.prefix)
+}
+
+// Check implementation
+// Always return a success
+func (c *controller) Check(ctx context.Context, msg *sc.CheckRequest) (*sc.CheckResponse, error) {
+	resp := &sc.CheckResponse{
+		OperationId: msg.Operation.OperationId,
+	}
+	c.SpyCR = msg
+	return resp, c.PlantedError
+}
+
+// Report into a log file
+func (c *controller) Report(ctx context.Context, msg *sc.ReportRequest) (*sc.ReportResponse, error) {
+	c.SpyRR = msg
+	return &sc.ReportResponse{}, c.PlantedError
+}
+
+func (c *controller) GetReportQueue() chan *sc.ReportRequest {
+	return c.reportQueue
+}
+
+// build a controller
+func NewController() *controller {
+	return &controller{reportQueue: make(chan *sc.ReportRequest)}
 }

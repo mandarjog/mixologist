@@ -11,32 +11,46 @@ import (
 )
 
 // NewHandler -- return a handler with initialized handler map
-func NewHandler(server ServiceControllerServer, hh []*PrefixAndHandler) *Handler {
-	return &Handler{
+func NewHandler(server ServiceControllerServer, hh []*PrefixAndHandler, opts ...func(*Handler)) *Handler {
+	h := &Handler{
 		Server:         server,
 		ReportHandlers: hh,
+		readf:          ioutil.ReadAll,
+		marshal:        proto.Marshal,
+		unmarshal:      proto.Unmarshal,
 	}
+	for _, opt := range opts {
+		opt(h)
+	}
+	return h
+}
 
+// Marshal -- specify an override fn for marshaling protobuf default: proto.Marshal
+func Marshal(marshal marshalfn) func(*Handler) {
+	return func(h *Handler) {
+		h.marshal = marshal
+	}
+}
+
+// ReadHTTPBody -- provide alternate implementation for reading http body. default: ioutil.ReadAll
+func ReadHTTPBody(readf readfn) func(*Handler) {
+	return func(h *Handler) {
+		h.readf = readf
+	}
 }
 
 // Perform common preamble during message specific processing
 func (h *Handler) preambleProcess(w http.ResponseWriter, r *http.Request, msg proto.Message) (err error) {
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := h.readf(r.Body)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		glog.Error(err)
 		return
 	}
-	err = proto.Unmarshal(body, msg)
+	err = h.unmarshal(body, msg)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		glog.Error(err)
 		return
 	}
 
-	if glog.V(2) {
-		glog.Info(msg.String())
-	}
+	glog.V(2).Infoln(msg.String())
 	return
 }
 
@@ -69,9 +83,9 @@ func (h *Handler) getServerFn(w http.ResponseWriter, r *http.Request) serverFn {
 		return nil
 	}
 
-	if strings.HasSuffix(r.RequestURI, ":check") {
+	if strings.HasSuffix(r.RequestURI, CheckSuffix) {
 		return h.serverCheck
-	} else if strings.HasSuffix(r.RequestURI, ":report") {
+	} else if strings.HasSuffix(r.RequestURI, ReportSuffix) {
 		return h.serverReport
 	}
 
@@ -101,15 +115,15 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
 		glog.Error(err)
 		return
 	}
-
-	respb, err := proto.Marshal(resp)
-	if err != nil {
+	if respb, err := h.marshal(resp); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
 		glog.Error(err)
-		return
+	} else {
+		w.Write(respb)
 	}
-	w.Write(respb)
 }

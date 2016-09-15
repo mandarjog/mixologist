@@ -17,14 +17,19 @@ func (c *ControllerImpl) Check(ctx context.Context, msg *sc.CheckRequest) (*sc.C
 
 // Report into a log file
 func (c *ControllerImpl) Report(ctx context.Context, msg *sc.ReportRequest) (*sc.ReportResponse, error) {
-	c.ReportQueue <- msg
+	c.reportQueue <- msg
 	resp := &sc.ReportResponse{}
 	return resp, nil
 }
 
+// ReportQueue -- get a reference to the underlying channel
+func (c *ControllerImpl) ReportQueue() chan *sc.ReportRequest {
+	return c.reportQueue
+}
+
 // NewControllerImpl - return a newly created controller
-func NewControllerImpl() *ControllerImpl {
+func NewControllerImpl() Controller {
 	return &ControllerImpl{
-		ReportQueue: make(chan *sc.ReportRequest),
+		reportQueue: make(chan *sc.ReportRequest),
 	}
 }
