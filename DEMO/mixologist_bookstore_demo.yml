@@ -176,6 +176,43 @@ spec:
         ports:
           - containerPort: 3000
 
+# statsd
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: statsd
+spec:
+  ports:
+  - port: 8125
+    protocol: UDP
+    name: statsd
+  - port: 80
+    protocol: TCP
+    name: graphite
+  selector:
+    app: statsd
+----
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: statsd
+spec:
+  replicas: 1
+  selector:
+    app: statsd
+  template:
+    metadata:
+      labels:
+        app: statsd
+    spec:
+      containers:
+      - name: statsd
+        image: hopsoft/graphite-statsd
+        ports:
+          - containerPort: 8125
+          - containerPort: 80
+
 # ESP
 ---
 apiVersion: v1

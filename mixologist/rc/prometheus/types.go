@@ -13,7 +13,6 @@ type (
 	prometheusConsumer struct {
 		MetricSummaryMap map[string]*promclnt.SummaryVec
 		ProducerMetrics  map[string]interface{}
-		meta             map[string]interface{}
 	}
 	builder struct {
 	}

@@ -11,10 +11,9 @@ import (
 var _ = gn.Describe("ReportConsumerManager", func() {
 	var (
 		name0      = "testRC0"
-		map0       = make(map[string]interface{})
-		rcbuilder0 = fakes.NewBuilder(name0, map0)
+		rcbuilder0 = fakes.NewBuilder(name0)
 		name1      = "testRC1"
-		rcbuilder1 = fakes.NewBuilder(name1, nil)
+		rcbuilder1 = fakes.NewBuilder(name1)
 		rqChan     chan *sc.ReportRequest
 		rcMgr      *ReportConsumerManagerImpl
 	)
@@ -22,10 +21,9 @@ var _ = gn.Describe("ReportConsumerManager", func() {
 		gn.BeforeEach(func() {
 			rqChan = make(chan *sc.ReportRequest)
 			ReportConsumerRegistry = make(map[string]ReportConsumerBuilder)
-			map0[fakes.HandlerPrefix] = "/" + name0
 			RegisterReportConsumer(name0, rcbuilder0)
 			RegisterReportConsumer(name1, rcbuilder1)
-			rcMgr = NewReportConsumerManager(rqChan, ReportConsumerRegistry, []string{"name", name0, name1})
+			rcMgr = NewReportConsumerManager(rqChan, ReportConsumerRegistry, Config{Metrics: MetricsConfig{Backends: []string{"name", name0, name1}}})
 		})
 		gn.Context("when: called with correct params", func() {
 			gn.It("then: returns an initialized Manager", func() {

@@ -11,6 +11,9 @@ import (
 )
 
 var (
+	// Config contains configuration for a statsd backend.
+	Config ServerConfig
+
 	sizeHistogramBuckets = []float64{1, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7}
 	timeHistogramBuckets = []float64{1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1, 1e1}
 	metricNameReplacer   = strings.NewReplacer("serviceruntime.googleapis.com", "service", "cloud.googleapis.com", "cloud", "/", ".")
@@ -150,8 +153,8 @@ func (c *consumer) GetPrefixAndHandler() *mixologist.PrefixAndHandler {
 	return nil
 }
 
-func (b *builder) New(meta map[string]interface{}) mixologist.ReportConsumer {
-	if c, err := sd.NewClient(meta[AddrArg].(string), ""); err == nil {
+func (b *builder) NewConsumer(c mixologist.Config) mixologist.ReportConsumer {
+	if c, err := sd.NewClient(Config.Addr, ""); err == nil {
 		return &consumer{
 			client: c,
 		}

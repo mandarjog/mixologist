@@ -9,6 +9,17 @@ import (
 )
 
 type (
+
+	// Config stores global config for all mixologist.
+	Config struct {
+		Metrics MetricsConfig
+	}
+
+	// MetricsConfig stores global configuration for metrics backends.
+	MetricsConfig struct {
+		Backends []string
+	}
+
 	// ServiceControllerServer API
 	// Same interface as used by grpc
 	ServiceControllerServer interface {
@@ -86,6 +97,6 @@ type (
 	// in the init method
 	ReportConsumerBuilder interface {
 		// Given an arbitrary map create a new consumer
-		NewConsumer(map[string]interface{}) ReportConsumer
+		NewConsumer(Config) ReportConsumer
 	}
 )

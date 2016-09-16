@@ -12,15 +12,10 @@ import (
 )
 
 // create a new builder
-func NewBuilder(name string, meta map[string]interface{}) *builder {
-	if meta == nil {
-		meta = make(map[string]interface{})
-	}
+func NewBuilder(name string) *builder {
 	bldr := &builder{
 		name: name,
-		meta: meta,
 	}
-
 	return bldr
 }
 
@@ -35,20 +30,11 @@ func BuildPrefixAndHandler(prx string) *mixologist.PrefixAndHandler {
 }
 
 // ReportConsumerBuilder
-func (s *builder) NewConsumer(meta map[string]interface{}) mixologist.ReportConsumer {
-	var prefixAndHandler *mixologist.PrefixAndHandler
-	if meta == nil {
-		meta = s.meta
-	}
-	if _prx, found := meta[HandlerPrefix]; found {
-		prx := _prx.(string)
-		prefixAndHandler = BuildPrefixAndHandler(prx)
-	}
+func (s *builder) NewConsumer(c mixologist.Config) mixologist.ReportConsumer {
 	s.Consumer = &consumer{
 		name:    s.name,
-		meta:    meta,
 		Msgs:    list.New(),
-		handler: prefixAndHandler,
+		handler: BuildPrefixAndHandler("fake-handler"),
 		lock:    &sync.Mutex{},
 	}
 	return s.Consumer

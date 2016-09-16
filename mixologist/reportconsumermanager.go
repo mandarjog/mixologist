@@ -5,13 +5,14 @@ import (
 	sc "google/api/servicecontrol/v1"
 )
 
-// NewReportConsumerManager -- create a new report consumer manager with the specified list of consumers
-func NewReportConsumerManager(rq chan *sc.ReportRequest, registry map[string]ReportConsumerBuilder, consumers []string) *ReportConsumerManagerImpl {
-	consumerImpls := make([]ReportConsumer, 0, len(consumers))
-	for _, consumerName := range consumers {
+// NewReportConsumerManager -- create a new report consumer manager with the configured list of consumers
+func NewReportConsumerManager(rq chan *sc.ReportRequest, registry map[string]ReportConsumerBuilder, c Config) *ReportConsumerManagerImpl {
+	glog.Infof("creating consumer manager with config: %v", c)
+	consumerImpls := make([]ReportConsumer, 0, len(c.Metrics.Backends))
+	for _, consumerName := range c.Metrics.Backends {
 		if cn, ok := registry[consumerName]; ok {
 			//TODO pass map params to cn.New
-			consumerImpls = append(consumerImpls, cn.NewConsumer(nil))
+			consumerImpls = append(consumerImpls, cn.NewConsumer(c))
 		}
 	}
 	return &ReportConsumerManagerImpl{

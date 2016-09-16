@@ -10,6 +10,10 @@ func init() {
 }
 
 type (
+	// ServerConfig contains configuration info for a statsd backend
+	ServerConfig struct {
+		Addr string
+	}
 	consumer struct {
 		client sd.Statter
 	}
