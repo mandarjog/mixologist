@@ -2,7 +2,7 @@ package prometheus
 
 import (
 	"github.com/golang/glog"
-	promclnt "github.com/prometheus/client_golang/prometheus"
+	pc "github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	sc "google/api/servicecontrol/v1"
 	"math/big"
@@ -11,10 +11,25 @@ import (
 )
 
 var (
-	sizeHistogramBuckets = promclnt.ExponentialBuckets(1, 10, 8)
-	timeHistogramBuckets = promclnt.ExponentialBuckets(1e-6, 10, 8)
+	sizeHistogramBuckets = pc.ExponentialBuckets(1, 10, 8)
+	timeHistogramBuckets = pc.ExponentialBuckets(1e-6, 10, 8)
 	histogramLabelNames  = prometheusSafeNames(mixologist.MonitoredAPIResourceLabels)
 	slashReplacer        = strings.NewReplacer("/", "_", ".", "_")
+
+	// metrics
+	reqs       = newCounterVec(mixologist.ProducerRequestCount, "Request Count", mixologist.PerMetricLabels[mixologist.ProducerRequestCount])
+	reqsByCons = newCounterVec(mixologist.ProducerRequestCountByConsumer, "Request Count By Consumer", mixologist.PerMetricLabels[mixologist.ProducerRequestCountByConsumer])
+	totLat     = newTimeHistogramVec(mixologist.ProducerTotalLatencies, "Total Latency")
+	backendLat = newTimeHistogramVec(mixologist.ProducerBackendLatencies, "Backend Latency")
+	reqSize    = newSizeHistogramVec(mixologist.ProducerRequestSizes, "Request Size")
+
+	metrics = map[string]interface{}{
+		mixologist.ProducerRequestCount:           reqs,
+		mixologist.ProducerRequestCountByConsumer: reqsByCons,
+		mixologist.ProducerTotalLatencies:         totLat,
+		mixologist.ProducerBackendLatencies:       backendLat,
+		mixologist.ProducerRequestSizes:           reqSize,
+	}
 )
 
 func prometheusSafeName(n string) string {
@@ -31,75 +46,61 @@ func prometheusSafeNames(names []string) []string {
 }
 
 // prepare identity mapped s
-func getMetricsMap(metricNames [][]string) map[string]*promclnt.SummaryVec {
-	mm := make(map[string]*promclnt.SummaryVec)
+func getMetricsMap(metricNames [][]string) map[string]*pc.SummaryVec {
+	mm := make(map[string]*pc.SummaryVec)
 	for _, metricName := range metricNames {
-		m := promclnt.NewSummaryVec(
-			promclnt.SummaryOpts{
+		m := pc.NewSummaryVec(
+			pc.SummaryOpts{
 				Name: metricName[1],
 				Help: metricName[0],
 			},
 			[]string{"service", "api_method"},
 		)
 		mm[metricName[0]] = m
-		promclnt.MustRegister(m)
+		pc.MustRegister(m)
 	}
 	return mm
 }
 
-func newCounterVec(name, desc string, labels ...string) *promclnt.CounterVec {
-	c := promclnt.NewCounterVec(
-		promclnt.CounterOpts{
+func newCounterVec(name, desc string, labels []string) *pc.CounterVec {
+	c := pc.NewCounterVec(
+		pc.CounterOpts{
 			Name: prometheusSafeName(name),
 			Help: desc,
 		},
 		append(histogramLabelNames, prometheusSafeNames(labels)...),
 	)
-	promclnt.MustRegister(c)
 	return c
 }
 
 // {8, 10.0, 1e-6};
-func newTimeHistogramVec(name, desc string) *promclnt.HistogramVec {
-	c := promclnt.NewHistogramVec(
-		promclnt.HistogramOpts{
+func newTimeHistogramVec(name, desc string) *pc.HistogramVec {
+	c := pc.NewHistogramVec(
+		pc.HistogramOpts{
 			Name:    prometheusSafeName(name),
 			Help:    desc,
 			Buckets: timeHistogramBuckets,
 		},
 		histogramLabelNames,
 	)
-	promclnt.MustRegister(c)
 	return c
 }
 
 // {8, 10.0, 1};
-func newSizeHistogramVec(name, desc string) *promclnt.HistogramVec {
-	c := promclnt.NewHistogramVec(
-		promclnt.HistogramOpts{
+func newSizeHistogramVec(name, desc string) *pc.HistogramVec {
+	c := pc.NewHistogramVec(
+		pc.HistogramOpts{
 			Name:    prometheusSafeName(name),
 			Help:    desc,
 			Buckets: sizeHistogramBuckets,
 		},
 		histogramLabelNames,
 	)
-	promclnt.MustRegister(c)
 	return c
 }
 
-func producerMetrics() map[string]interface{} {
-	m := map[string]interface{}{
-		mixologist.ProducerRequestCount:           newCounterVec(mixologist.ProducerRequestCount, "Request Count", mixologist.PerMetricLabels[mixologist.ProducerRequestCount]...),
-		mixologist.ProducerTotalLatencies:         newTimeHistogramVec(mixologist.ProducerTotalLatencies, "Total latencies"),
-		mixologist.ProducerBackendLatencies:       newTimeHistogramVec(mixologist.ProducerBackendLatencies, "Backend latencies"),
-		mixologist.ProducerRequestSizes:           newSizeHistogramVec(mixologist.ProducerRequestSizes, "Request Sizes"),
-		mixologist.ProducerRequestCountByConsumer: newCounterVec(mixologist.ProducerRequestCountByConsumer, "Request Count By Consumer", mixologist.PerMetricLabels[mixologist.ProducerRequestCountByConsumer]...),
-	}
-	return m
-}
-
-func buildLabels(defaults map[string]string, m *sc.MetricValue) promclnt.Labels {
-	l := promclnt.Labels{}
+func buildLabels(defaults map[string]string, m *sc.MetricValue) pc.Labels {
+	l := pc.Labels{}
 	for _, k := range mixologist.MonitoredAPIResourceLabels {
 		l[prometheusSafeName(k)] = missingLabelValue
 	}
@@ -121,7 +122,7 @@ func bucketsMatch(b *sc.Distribution_ExponentialBuckets, d *mixologist.Exponenti
 		big.NewFloat(b.Scale).Cmp(big.NewFloat(d.StartValue)) == 0
 }
 
-func populateFromBuckets(hist promclnt.Histogram, dist *sc.Distribution, ed *mixologist.ExponentialDistribution, buckets []float64) {
+func populateFromBuckets(hist pc.Histogram, dist *sc.Distribution, ed *mixologist.ExponentialDistribution, buckets []float64) {
 	if !bucketsMatch(dist.GetExponentialBuckets(), ed) {
 		glog.Warningf("not a match. expected: %v, got: %\n", ed, dist.GetExponentialBuckets)
 		return
@@ -147,8 +148,8 @@ func populateFromBuckets(hist promclnt.Histogram, dist *sc.Distribution, ed *mix
 	}
 }
 
-func filter(src promclnt.Labels, metricLabels []string) promclnt.Labels {
-	filteredLabels := promclnt.Labels{}
+func filter(src pc.Labels, metricLabels []string) pc.Labels {
+	filteredLabels := pc.Labels{}
 	for _, k := range metricLabels {
 		if v, ok := src[k]; ok {
 			filteredLabels[k] = v
@@ -157,7 +158,7 @@ func filter(src promclnt.Labels, metricLabels []string) promclnt.Labels {
 	return filteredLabels
 }
 
-func addObservation(h *promclnt.HistogramVec, l promclnt.Labels, mv *sc.MetricValue, name string) {
+func addObservation(h *pc.HistogramVec, l pc.Labels, mv *sc.MetricValue, name string) {
 	d := mv.GetDistributionValue()
 	if d == nil {
 		return
@@ -174,12 +175,12 @@ func addObservation(h *promclnt.HistogramVec, l promclnt.Labels, mv *sc.MetricVa
 	}
 }
 
-func (p *prometheusConsumer) process(mvs *sc.MetricValueSet, defaultLabels map[string]string) {
-	if m, ok := p.ProducerMetrics[mvs.MetricName]; ok {
+func process(mvs *sc.MetricValueSet, defaultLabels map[string]string) {
+	if m, ok := metrics[mvs.MetricName]; ok {
 		for _, mv := range mvs.GetMetricValues() {
 			labels := buildLabels(defaultLabels, mv)
 			switch t := m.(type) {
-			case *promclnt.CounterVec:
+			case *pc.CounterVec:
 
 				// need to ensure proper label cardinality
 				filteredLabels := filter(labels, histogramLabelNames)
@@ -192,7 +193,7 @@ func (p *prometheusConsumer) process(mvs *sc.MetricValueSet, defaultLabels map[s
 				}
 
 				t.With(filteredLabels).Add(float64(mv.GetInt64Value()))
-			case *promclnt.HistogramVec:
+			case *pc.HistogramVec:
 				addObservation(t, labels, mv, mvs.MetricName)
 			}
 		}
@@ -200,7 +201,7 @@ func (p *prometheusConsumer) process(mvs *sc.MetricValueSet, defaultLabels map[s
 }
 
 // Consume -- Called to consume 1 reportMsg at a time
-func (p *prometheusConsumer) Consume(reportMsg *sc.ReportRequest) error {
+func (p *consumer) Consume(reportMsg *sc.ReportRequest) error {
 	service := reportMsg.ServiceName
 	for _, oprn := range reportMsg.GetOperations() {
 		defaultLabels := oprn.GetLabels()
@@ -208,12 +209,12 @@ func (p *prometheusConsumer) Consume(reportMsg *sc.ReportRequest) error {
 		defaultLabels[mixologist.ConsumerID] = oprn.ConsumerId
 
 		for _, mvs := range oprn.GetMetricValueSets() {
-			p.process(mvs, defaultLabels)
+			process(mvs, defaultLabels)
 		}
 
 		for _, le := range oprn.GetLogEntries() {
 			fm := le.GetStructPayload().GetFields()
-			labels := promclnt.Labels{"api_method": fm["api_method"].GetStringValue(),
+			labels := pc.Labels{"api_method": fm["api_method"].GetStringValue(),
 				"service": fm["api_name"].GetStringValue()}
 			for mn, metric := range p.MetricSummaryMap {
 				if v := fm[mn]; v != nil {
@@ -231,7 +232,7 @@ func (p *prometheusConsumer) Consume(reportMsg *sc.ReportRequest) error {
 }
 
 // GetName interface method
-func (p *prometheusConsumer) GetName() string {
+func (p *consumer) GetName() string {
 	return Name
 }
 
@@ -239,7 +240,7 @@ func (p *prometheusConsumer) GetName() string {
 // Push type (statsd) consumers will only have a consumer loop
 // Prometheus needs an additional listerner so that the prometheus
 // framework can fetch data from the /metrics endpoint
-func (p *prometheusConsumer) GetPrefixAndHandler() *mixologist.PrefixAndHandler {
+func (p *consumer) GetPrefixAndHandler() *mixologist.PrefixAndHandler {
 	return &mixologist.PrefixAndHandler{
 		Prefix:  "/metrics",
 		Handler: promhttp.Handler(),
@@ -249,11 +250,14 @@ func (p *prometheusConsumer) GetPrefixAndHandler() *mixologist.PrefixAndHandler 
 /* Implements ReportConsumerBuilder */
 // New -- Returns a new prometheus consumer
 func (s *builder) NewConsumer(c mixologist.Config) mixologist.ReportConsumer {
-	return &prometheusConsumer{
+	// only register when actually built
+	for _, m := range metrics {
+		pc.MustRegister(m.(pc.Collector))
+	}
+	return &consumer{
 		MetricSummaryMap: getMetricsMap([][]string{
 			[]string{"request_latency_in_ms", "http_request_duration_microseconds"},
 			[]string{"request_size", "http_request_size_bytes"},
 			[]string{"response_size", "http_response_size_bytes"}}),
-		ProducerMetrics: producerMetrics(),
 	}
 }
