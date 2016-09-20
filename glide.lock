@@ -1,10 +1,18 @@
 hash: c736f1dbc581c7cc7f11d33896cf74930b3491a7a4dfd71c1b8a79c5061a6ab1
-updated: 2016-09-12T12:05:33.852180103-07:00
+updated: 2016-09-16T15:10:07.730923225-07:00
 imports:
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
   subpackages:
   - quantile
+- name: github.com/cactus/go-statsd-client
+  version: 1c27c506c7a0584d017ca479f91b88d6a6538332
+  subpackages:
+  - statsd
+- name: github.com/fluent/fluent-logger-golang
+  version: e4d9d30c15bac2108920d9e0ec4edcef3ece0907
+  subpackages:
+  - fluent
 - name: github.com/golang/glog
   version: 23def4e6c14b4da8ac2ed8007337bc5eb5007998
 - name: github.com/golang/protobuf
@@ -26,6 +34,8 @@ imports:
   - ginkgo
 - name: github.com/onsi/gomega
   version: d59fa0ac68bb5dd932ee8d24eed631cdd519efc3
+- name: github.com/philhofer/fwd
+  version: 98c11a7a6ec829d672b03833c3d69a7fae1ca972
 - name: github.com/prometheus/client_golang
   version: c5b7fccd204277076155f10851dad72b76a49317
   subpackages:
@@ -43,10 +53,18 @@ imports:
   - internal/bitbucket.org/ww/goautoneg
 - name: github.com/prometheus/procfs
   version: abf152e5f3e97f2fafac028d2cc06c1feb87ffa5
+- name: github.com/tinylib/msgp
+  version: ad0ff2e232ad2e37faf67087fb24bf8d04a8ce20
+  subpackages:
+  - msgp
 - name: golang.org/x/net
   version: 7394c112eae4dba7e96bfcfe738e6373d61772b4
   subpackages:
   - context
+- name: google/api/servicecontrol/v1
+  version: ""
+- name: google/logging/type
+  version: ""
 - name: gopkg.in/yaml.v2
   version: 31c299268d302dd0aa9a0dcf765a3d58971ac83f
-testImports: []
+devImports: []
