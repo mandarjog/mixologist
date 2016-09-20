@@ -1,7 +1,7 @@
 package prometheus
 
 import (
-	promclnt "github.com/prometheus/client_golang/prometheus"
+	pc "github.com/prometheus/client_golang/prometheus"
 	"somnacin-internal/mixologist/mixologist"
 )
 
@@ -10,9 +10,8 @@ func init() {
 }
 
 type (
-	prometheusConsumer struct {
-		MetricSummaryMap map[string]*promclnt.SummaryVec
-		ProducerMetrics  map[string]interface{}
+	consumer struct {
+		MetricSummaryMap map[string]*pc.SummaryVec
 	}
 	builder struct {
 	}
