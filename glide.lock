@@ -61,10 +61,6 @@ imports:
   version: 7394c112eae4dba7e96bfcfe738e6373d61772b4
   subpackages:
   - context
-- name: google/api/servicecontrol/v1
-  version: ""
-- name: google/logging/type
-  version: ""
 - name: gopkg.in/yaml.v2
   version: 31c299268d302dd0aa9a0dcf765a3d58971ac83f
 devImports: []
