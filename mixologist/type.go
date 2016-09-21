@@ -12,12 +12,13 @@ type (
 
 	// Config stores global config for all mixologist.
 	Config struct {
-		Metrics MetricsConfig
+		ReportConsumers []string
+		Logging         LogsConfig
 	}
 
-	// MetricsConfig stores global configuration for metrics backends.
-	MetricsConfig struct {
-		Backends []string
+	LogsConfig struct {
+		Backends   []string
+		UseDefault bool
 	}
 
 	// ServiceControllerServer API
