@@ -59,9 +59,9 @@ type (
 		ReportHandlers []*PrefixAndHandler
 
 		// private type when alternate impl is provided at construction time
-		readf     readfn
-		marshal   marshalfn
-		unmarshal unmarshalfn
+		readf     func(r io.Reader) (msg []byte, err error)
+		marshal   func(pb proto.Message) (buf []byte, err error)
+		unmarshal func(buf []byte, pb proto.Message) error
 	}
 	// ControllerImpl -- The controller that is implemented by framework itself
 	// It delelegates the actual work to a the *real* ServiceControllerServer
@@ -98,6 +98,6 @@ type (
 	// in the init method
 	ReportConsumerBuilder interface {
 		// Given an arbitrary map create a new consumer
-		NewConsumer(Config) ReportConsumer
+		BuildConsumer(Config) (ReportConsumer, error)
 	}
 )

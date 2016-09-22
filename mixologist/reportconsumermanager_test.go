@@ -11,9 +11,9 @@ import (
 var _ = gn.Describe("ReportConsumerManager", func() {
 	var (
 		name0      = "testRC0"
-		rcbuilder0 = fakes.NewBuilder(name0)
+		rcbuilder0 = fakes.NewBuilder(name0, nil)
 		name1      = "testRC1"
-		rcbuilder1 = fakes.NewBuilder(name1)
+		rcbuilder1 = fakes.NewBuilder(name1, nil)
 		rqChan     chan *sc.ReportRequest
 		rcMgr      *ReportConsumerManagerImpl
 	)

@@ -125,7 +125,7 @@ func TestConsume(t *testing.T) {
 	}
 
 	b := &builder{}
-	c := b.NewConsumer(mixologist.Config{})
+	c, _ := b.BuildConsumer(mixologist.Config{})
 
 	for _, v := range consumeTests {
 
