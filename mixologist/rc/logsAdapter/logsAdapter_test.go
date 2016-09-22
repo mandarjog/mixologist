@@ -1,9 +1,7 @@
-package glog
+package logsAdapter
 
 import (
 	"bytes"
-	"flag"
-	"github.com/golang/glog"
 	structpb "github.com/golang/protobuf/ptypes/struct"
 	tspb "github.com/golang/protobuf/ptypes/timestamp"
 	sc "google/api/servicecontrol/v1"
@@ -92,26 +90,26 @@ func TestConsume(t *testing.T) {
 			name:      "Struct Payload (String), Single Entry",
 			report:    newReportReq(newStructLogEntry(newStructPayload(map[string]*structpb.Value{"api_method": stringVal("ListShelves")}))),
 			wantLines: 1,
-			wantText:  []string{"{\"logName\":\"endpoints_log\",\"timestamp\":\"2016-08-23T09:44:13.808341-07:00\",\"resource\":{\"type\":\"api\",\"labels\":{\"cloud.googleapis.com/location\":\"us-west1-a\",\"cloud.googleapis.com/service\":\"test-service\",\"serviceruntime.googleapis.com/api_method\":\"TestMethod\",\"serviceruntime.googleapis.com/api_version\":\"test-service-v1.appspot.com\"}},\"severity\":\"INFO\",\"jsonPayload\":{\"api_method\":\"ListShelves\"}}"},
+			wantText:  []string{"{\"logName\":\"endpoints_log\",\"timestamp\":\"2016-08-23T09:44:13.808341-07:00\",\"resource\":{\"type\":\"api\",\"labels\":{\"cloud.googleapis.com/location\":\"us-west1-a\",\"cloud.googleapis.com/service\":\"test-service\",\"serviceruntime.googleapis.com/api_method\":\"TestMethod\",\"serviceruntime.googleapis.com/api_version\":\"test-service-v1.appspot.com\"}},\"severity\":\"INFO\",\"structPayload\":{\"api_method\":\"ListShelves\"}}"},
 		},
 		{
 			name:      "Struct Payload (String), Single Entry (with bool)",
 			report:    newReportReq(newStructLogEntry(newStructPayload(map[string]*structpb.Value{"boolean": boolVal(true)}))),
 			wantLines: 1,
-			wantText:  []string{"{\"logName\":\"endpoints_log\",\"timestamp\":\"2016-08-23T09:44:13.808341-07:00\",\"resource\":{\"type\":\"api\",\"labels\":{\"cloud.googleapis.com/location\":\"us-west1-a\",\"cloud.googleapis.com/service\":\"test-service\",\"serviceruntime.googleapis.com/api_method\":\"TestMethod\",\"serviceruntime.googleapis.com/api_version\":\"test-service-v1.appspot.com\"}},\"severity\":\"INFO\",\"jsonPayload\":{\"boolean\":true}}"},
+			wantText:  []string{"{\"logName\":\"endpoints_log\",\"timestamp\":\"2016-08-23T09:44:13.808341-07:00\",\"resource\":{\"type\":\"api\",\"labels\":{\"cloud.googleapis.com/location\":\"us-west1-a\",\"cloud.googleapis.com/service\":\"test-service\",\"serviceruntime.googleapis.com/api_method\":\"TestMethod\",\"serviceruntime.googleapis.com/api_version\":\"test-service-v1.appspot.com\"}},\"severity\":\"INFO\",\"structPayload\":{\"boolean\":true}}"},
 		},
 		{
 			name:      "Struct Payload (String), Single Entry (with list)",
 			report:    newReportReq(newStructLogEntry(newStructPayload(map[string]*structpb.Value{"latency": floatListVal(78.234)}))),
 			wantLines: 1,
-			wantText:  []string{"{\"logName\":\"endpoints_log\",\"timestamp\":\"2016-08-23T09:44:13.808341-07:00\",\"resource\":{\"type\":\"api\",\"labels\":{\"cloud.googleapis.com/location\":\"us-west1-a\",\"cloud.googleapis.com/service\":\"test-service\",\"serviceruntime.googleapis.com/api_method\":\"TestMethod\",\"serviceruntime.googleapis.com/api_version\":\"test-service-v1.appspot.com\"}},\"severity\":\"INFO\",\"jsonPayload\":{\"latency\":[78.234]}}"},
+			wantText:  []string{"{\"logName\":\"endpoints_log\",\"timestamp\":\"2016-08-23T09:44:13.808341-07:00\",\"resource\":{\"type\":\"api\",\"labels\":{\"cloud.googleapis.com/location\":\"us-west1-a\",\"cloud.googleapis.com/service\":\"test-service\",\"serviceruntime.googleapis.com/api_method\":\"TestMethod\",\"serviceruntime.googleapis.com/api_version\":\"test-service-v1.appspot.com\"}},\"severity\":\"INFO\",\"structPayload\":{\"latency\":[78.234]}}"},
 		},
 		{
 			name:      "Struct Payload (Struct-ception), Single Entry",
 			report:    newReportReq(newStructLogEntry(newStructPayload(map[string]*structpb.Value{"embedded": structVal(map[string]*structpb.Value{"test": stringVal("test")})}))),
 			wantLines: 1,
 			wantText: []string{
-				"{\"logName\":\"endpoints_log\",\"timestamp\":\"2016-08-23T09:44:13.808341-07:00\",\"resource\":{\"type\":\"api\",\"labels\":{\"cloud.googleapis.com/location\":\"us-west1-a\",\"cloud.googleapis.com/service\":\"test-service\",\"serviceruntime.googleapis.com/api_method\":\"TestMethod\",\"serviceruntime.googleapis.com/api_version\":\"test-service-v1.appspot.com\"}},\"severity\":\"INFO\",\"jsonPayload\":{\"embedded\":{\"test\":\"test\"}}}",
+				"{\"logName\":\"endpoints_log\",\"timestamp\":\"2016-08-23T09:44:13.808341-07:00\",\"resource\":{\"type\":\"api\",\"labels\":{\"cloud.googleapis.com/location\":\"us-west1-a\",\"cloud.googleapis.com/service\":\"test-service\",\"serviceruntime.googleapis.com/api_method\":\"TestMethod\",\"serviceruntime.googleapis.com/api_version\":\"test-service-v1.appspot.com\"}},\"severity\":\"INFO\",\"structPayload\":{\"embedded\":{\"test\":\"test\"}}}",
 			},
 		},
 		{
@@ -120,18 +118,14 @@ func TestConsume(t *testing.T) {
 				newStructLogEntry(newStructPayload(map[string]*structpb.Value{"url": stringVal("/shelves")}))),
 			wantLines: 2,
 			wantText: []string{
-				"{\"logName\":\"endpoints_log\",\"timestamp\":\"2016-08-23T09:44:13.808341-07:00\",\"resource\":{\"type\":\"api\",\"labels\":{\"cloud.googleapis.com/location\":\"us-west1-a\",\"cloud.googleapis.com/service\":\"test-service\",\"serviceruntime.googleapis.com/api_method\":\"TestMethod\",\"serviceruntime.googleapis.com/api_version\":\"test-service-v1.appspot.com\"}},\"severity\":\"INFO\",\"jsonPayload\":{\"api_method\":\"ListShelves\"}}",
-				"{\"logName\":\"endpoints_log\",\"timestamp\":\"2016-08-23T09:44:13.808341-07:00\",\"resource\":{\"type\":\"api\",\"labels\":{\"cloud.googleapis.com/location\":\"us-west1-a\",\"cloud.googleapis.com/service\":\"test-service\",\"serviceruntime.googleapis.com/api_method\":\"TestMethod\",\"serviceruntime.googleapis.com/api_version\":\"test-service-v1.appspot.com\"}},\"severity\":\"INFO\",\"jsonPayload\":{\"url\":\"/shelves\"}}",
+				"{\"logName\":\"endpoints_log\",\"timestamp\":\"2016-08-23T09:44:13.808341-07:00\",\"resource\":{\"type\":\"api\",\"labels\":{\"cloud.googleapis.com/location\":\"us-west1-a\",\"cloud.googleapis.com/service\":\"test-service\",\"serviceruntime.googleapis.com/api_method\":\"TestMethod\",\"serviceruntime.googleapis.com/api_version\":\"test-service-v1.appspot.com\"}},\"severity\":\"INFO\",\"structPayload\":{\"api_method\":\"ListShelves\"}}",
+				"{\"logName\":\"endpoints_log\",\"timestamp\":\"2016-08-23T09:44:13.808341-07:00\",\"resource\":{\"type\":\"api\",\"labels\":{\"cloud.googleapis.com/location\":\"us-west1-a\",\"cloud.googleapis.com/service\":\"test-service\",\"serviceruntime.googleapis.com/api_method\":\"TestMethod\",\"serviceruntime.googleapis.com/api_version\":\"test-service-v1.appspot.com\"}},\"severity\":\"INFO\",\"structPayload\":{\"url\":\"/shelves\"}}",
 			},
 		},
 	}
 
 	b := &builder{}
 	c := b.NewConsumer(mixologist.Config{})
-
-	// we want glog to go to stderr so we can redirect for
-	// test validation of log generation
-	flag.Set("logtostderr", "true")
 
 	for _, v := range consumeTests {
 
@@ -147,13 +141,7 @@ func TestConsume(t *testing.T) {
 			outC <- buf.String()
 		}()
 
-		sl := glog.Stats.Info.Lines() // validate lines
-
 		c.Consume(v.report)
-
-		if got := glog.Stats.Info.Lines() - sl; got != v.wantLines {
-			t.Errorf("%s: got %v lines, want %v", v.name, v.wantLines)
-		}
 
 		// back to normal state
 		w.Close()
@@ -164,14 +152,9 @@ func TestConsume(t *testing.T) {
 			if s == "" {
 				continue
 			}
-			if got := trim(s); got != v.wantText[i] {
+			if got := s; got != v.wantText[i] {
 				t.Errorf("%s: got %v, want %v", v.name, got, v.wantText[i])
 			}
 		}
 	}
-}
-
-// trims glog line prefix stuff off of output log lines (glog prefix ends with ']')
-func trim(s string) string {
-	return strings.TrimRight(strings.TrimLeft(strings.SplitN(s, "]", 2)[1], " "), "\n")
 }
