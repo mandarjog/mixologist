@@ -153,11 +153,12 @@ func (c *consumer) GetPrefixAndHandler() *mixologist.PrefixAndHandler {
 	return nil
 }
 
-func (b *builder) NewConsumer(c mixologist.Config) mixologist.ReportConsumer {
-	if c, err := sd.NewClient(Config.Addr, ""); err == nil {
-		return &consumer{
-			client: c,
+func (b *builder) BuildConsumer(c mixologist.Config) (cc mixologist.ReportConsumer, err error) {
+	var client sd.Statter
+	if client, err = sd.NewClient(Config.Addr, ""); err == nil {
+		cc = &consumer{
+			client: client,
 		}
 	}
-	return nil
+	return cc, err
 }

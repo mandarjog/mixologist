@@ -154,7 +154,7 @@ func (c *consumer) GetPrefixAndHandler() *mixologist.PrefixAndHandler {
 	return nil
 }
 
-func (b *builder) NewConsumer(c mixologist.Config) mixologist.ReportConsumer {
+func (b *builder) BuildConsumer(c mixologist.Config) (mixologist.ReportConsumer, error) {
 	glog.Infof("adding consumer with config: %v", c)
 	cons := &consumer{}
 	for _, be := range c.Logging.Backends {
@@ -165,7 +165,7 @@ func (b *builder) NewConsumer(c mixologist.Config) mixologist.ReportConsumer {
 	if c.Logging.UseDefault {
 		cons.loggers = append(cons.loggers, stdLogger{})
 	}
-	return cons
+	return cons, nil
 }
 
 // default logger builder

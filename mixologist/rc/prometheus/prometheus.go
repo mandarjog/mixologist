@@ -249,7 +249,7 @@ func (p *consumer) GetPrefixAndHandler() *mixologist.PrefixAndHandler {
 
 /* Implements ReportConsumerBuilder */
 // New -- Returns a new prometheus consumer
-func (s *builder) NewConsumer(c mixologist.Config) mixologist.ReportConsumer {
+func (s *builder) BuildConsumer(c mixologist.Config) (mixologist.ReportConsumer, error) {
 	// only register when actually built
 	for _, m := range metrics {
 		pc.MustRegister(m.(pc.Collector))
@@ -259,5 +259,5 @@ func (s *builder) NewConsumer(c mixologist.Config) mixologist.ReportConsumer {
 			[]string{"request_latency_in_ms", "http_request_duration_microseconds"},
 			[]string{"request_size", "http_request_size_bytes"},
 			[]string{"response_size", "http_response_size_bytes"}}),
-	}
+	}, nil
 }

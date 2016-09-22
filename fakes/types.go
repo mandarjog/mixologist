@@ -17,6 +17,7 @@ type (
 	}
 	builder struct {
 		name     string
+		err      error
 		meta     map[string]interface{}
 		Consumer *consumer
 	}

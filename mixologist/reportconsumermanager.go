@@ -11,9 +11,12 @@ func NewReportConsumerManager(rq chan *sc.ReportRequest, registry map[string]Rep
 	consumerImpls := make([]ReportConsumer, 0, len(c.ReportConsumers))
 	for _, consumerName := range c.ReportConsumers {
 		if cn, ok := registry[consumerName]; ok {
-			//TODO pass map params to cn.New
-			glog.Info("starting consumer mgr: ", consumerName)
-			consumerImpls = append(consumerImpls, cn.NewConsumer(c))
+			if cc, err := cn.BuildConsumer(c); cc != nil {
+				glog.Info("Built consumer: ", consumerName, " ", cc)
+				consumerImpls = append(consumerImpls, cc)
+			} else {
+				glog.Error("Unable to build consumer: ", consumerName, " ", err)
+			}
 		}
 	}
 	return &ReportConsumerManagerImpl{

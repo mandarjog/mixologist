@@ -12,9 +12,10 @@ import (
 )
 
 // create a new builder
-func NewBuilder(name string) *builder {
+func NewBuilder(name string, err error) *builder {
 	bldr := &builder{
 		name: name,
+		err:  err,
 	}
 	return bldr
 }
@@ -30,14 +31,14 @@ func BuildPrefixAndHandler(prx string) *mixologist.PrefixAndHandler {
 }
 
 // ReportConsumerBuilder
-func (s *builder) NewConsumer(c mixologist.Config) mixologist.ReportConsumer {
+func (s *builder) BuildConsumer(c mixologist.Config) (mixologist.ReportConsumer, error) {
 	s.Consumer = &consumer{
 		name:    s.name,
 		Msgs:    list.New(),
 		handler: BuildPrefixAndHandler("fake-handler"),
 		lock:    &sync.Mutex{},
 	}
-	return s.Consumer
+	return s.Consumer, s.err
 }
 
 // ReportConsumer

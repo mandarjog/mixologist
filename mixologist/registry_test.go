@@ -10,7 +10,7 @@ import (
 var _ = gn.Describe("registry", func() {
 	var (
 		name      = "testRC"
-		rcbuilder = fakes.NewBuilder(name)
+		rcbuilder = fakes.NewBuilder(name, nil)
 	)
 	gn.Describe("given: RegisterReportConsumer()", func() {
 		gn.Context("when: passed a valid registration request", func() {
@@ -26,7 +26,7 @@ var _ = gn.Describe("registry", func() {
 				g.Expect(RegisterReportConsumer(name, rcbuilder)).To(g.Succeed())
 			})
 			gn.It("then: should fail re-add the specified consumer if its NOT same", func() {
-				g.Expect(RegisterReportConsumer(name, fakes.NewBuilder(name))).NotTo(g.Succeed())
+				g.Expect(RegisterReportConsumer(name, fakes.NewBuilder(name, nil))).NotTo(g.Succeed())
 			})
 		})
 	})
