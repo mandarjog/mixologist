@@ -23,7 +23,7 @@ var _ = gn.Describe("ReportConsumerManager", func() {
 			ReportConsumerRegistry = make(map[string]ReportConsumerBuilder)
 			RegisterReportConsumer(name0, rcbuilder0)
 			RegisterReportConsumer(name1, rcbuilder1)
-			rcMgr = NewReportConsumerManager(rqChan, ReportConsumerRegistry, Config{Metrics: MetricsConfig{Backends: []string{"name", name0, name1}}})
+			rcMgr = NewReportConsumerManager(rqChan, ReportConsumerRegistry, Config{ReportConsumers: []string{"name", name0, name1}})
 		})
 		gn.Context("when: called with correct params", func() {
 			gn.It("then: returns an initialized Manager", func() {
