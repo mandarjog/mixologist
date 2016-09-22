@@ -16,7 +16,6 @@ const (
 
 var (
 	plugins = make(map[string]mixologist.LoggerBuilder)
-	loggers []mixologist.Logger
 )
 
 func init() {
@@ -30,8 +29,10 @@ func RegisterLogsSink(name string, b mixologist.LoggerBuilder) {
 }
 
 type (
-	consumer struct{}
-	builder  struct{}
+	consumer struct {
+		loggers []mixologist.Logger
+	}
+	builder struct{}
 )
 
 func convert(k *structpb.Value) interface{} {
@@ -127,7 +128,7 @@ func (c *consumer) Consume(reportMsg *sc.ReportRequest) (err error) {
 
 		for _, le := range oprn.GetLogEntries() {
 			entry := logEntry(le, defaultLabels, startTime(oprn, le))
-			for _, v := range loggers {
+			for _, v := range c.loggers {
 				if err := v.Log(entry); err != nil {
 					glog.Errorf("could not log to logger %s: %v", v.Name, err)
 				}
@@ -135,7 +136,7 @@ func (c *consumer) Consume(reportMsg *sc.ReportRequest) (err error) {
 		}
 	}
 
-	for _, v := range loggers {
+	for _, v := range c.loggers {
 		v.Flush()
 	}
 
@@ -155,15 +156,16 @@ func (c *consumer) GetPrefixAndHandler() *mixologist.PrefixAndHandler {
 
 func (b *builder) NewConsumer(c mixologist.Config) mixologist.ReportConsumer {
 	glog.Infof("adding consumer with config: %v", c)
-	for _, b := range c.Logging.Backends {
-		if v, ok := plugins[b]; ok {
-			loggers = append(loggers, v.Build(c))
+	cons := &consumer{}
+	for _, be := range c.Logging.Backends {
+		if v, ok := plugins[be]; ok {
+			cons.loggers = append(cons.loggers, v.Build(c))
 		}
 	}
 	if c.Logging.UseDefault {
-		loggers = append(loggers, stdLogger{})
+		cons.loggers = append(cons.loggers, stdLogger{})
 	}
-	return &consumer{}
+	return cons
 }
 
 // default logger builder
