@@ -26,40 +26,61 @@
 # This way one mixologist and one ESP can service multiple services
 #
 
-# Bookstore .js App
+# Bookstore + ESP .js App
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: bookstore
+  name: bookstore-esp
 spec:
   ports:
+  - port: 8080
+    protocol: TCP
+    name: esp
   - port: 8081
     protocol: TCP
     name: bookstore
   selector:
-    app: bookstore
+    app: bookstore-esp
   type: LoadBalancer
 ----
 apiVersion: v1
 kind: ReplicationController
 metadata:
-  name: bookstore
+  name: bookstore-esp
 spec:
   replicas: 1
   selector:
-    app: bookstore
+    app: bookstore-esp
   template:
     metadata:
       labels:
-        app: bookstore
+        app: bookstore-esp
     spec:
+      volumes:
+      - name: bookstore-service-config
+        configMap:
+          name: bookstore-service-config
       containers:
       - name: bookstore
         image: ${BOOKSTORE_IMAGE}
         ports:
           - containerPort: 8081
-
+      - name: esp
+        image: ${ESP_IMAGE}
+        args: [
+          "--service_json_path", "/tmp/service-config/bookstore.json",
+          "--backend", "localhost:8081",
+          "--dns", "${dns}"
+        ]
+        ports:
+          - containerPort: 8080
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - mountPath: /tmp/service-config
+          name: bookstore-service-config
+          readOnly: true
 # mixologist
 ---
 apiVersion: v1
@@ -91,7 +112,7 @@ spec:
       - name: mixologist
         image: ${MIXOLOGIST_IMAGE}
         args: [
-          "-v=2",
+          "-v=0",
           "-logtostderr=true"
         ]
         ports:
@@ -110,7 +131,6 @@ spec:
     name: prometheus
   selector:
     app: prometheus
-  type: LoadBalancer
 ----
 apiVersion: v1
 kind: ReplicationController
@@ -212,52 +232,3 @@ spec:
         ports:
           - containerPort: 8125
           - containerPort: 80
-
-# ESP
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: esp
-spec:
-  ports:
-  - port: 8080
-    protocol: TCP
-    name: esp
-  selector:
-    app: esp
-  type: LoadBalancer
----
-apiVersion: v1
-kind: ReplicationController
-metadata:
-  name: esp
-spec:
-  replicas: 1
-  selector:
-    app: esp 
-  template:
-    metadata:
-      labels:
-        app: esp 
-    spec:
-      volumes:
-      - name: bookstore-service-config
-        configMap:
-          name: bookstore-service-config
-      containers:
-      - name: esp
-        image: ${ESP_IMAGE}
-        args: [
-          "--service_json_path", "/tmp/service-config/bookstore.json",
-          "--backend", "bookstore:8081",
-          "--dns", "${dns}"
-        ]
-        ports:
-          - containerPort: 8080
-        securityContext:
-          privileged: true
-        volumeMounts:
-        - mountPath: /tmp/service-config
-          name: bookstore-service-config
-          readOnly: true
