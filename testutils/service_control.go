@@ -35,8 +35,8 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes/struct"
+	"google.golang.org/genproto/googleapis/logging/type"
 	"google/api/servicecontrol/v1"
-	"google/logging/type"
 )
 
 type ExpectedCheck struct {
@@ -208,9 +208,9 @@ func createLogEntry(er *ExpectedReport) *servicecontrol.LogEntry {
 		pl["error_cause"] = makeStringValue(er.ErrorCause)
 	}
 
-	severity := _type.LogSeverity_INFO
+	severity := google_logging_type.LogSeverity_INFO
 	if er.ResponseCode >= 400 {
-		severity = _type.LogSeverity_ERROR
+		severity = google_logging_type.LogSeverity_ERROR
 	}
 
 	return &servicecontrol.LogEntry{

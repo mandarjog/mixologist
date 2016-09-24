@@ -16,11 +16,11 @@ syntax = "proto3";
 
 package google.api.servicecontrol.v1;
 
-import "google/api/annotations.proto";
+import "google.golang.org/genproto/googleapis/api/serviceconfig/annotations.proto";
 import "google/api/servicecontrol/v1/log_entry.proto";
 import "google/api/servicecontrol/v1/metric_value.proto";
 import "google/api/servicecontrol/v1/quota_properties.proto";
-import "google/protobuf/timestamp.proto";
+import "github.com/golang/protobuf/ptypes/timestamp/timestamp.proto";
 
 option cc_enable_arenas = true;
 option java_multiple_files = true;

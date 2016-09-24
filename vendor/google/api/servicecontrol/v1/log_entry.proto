@@ -16,12 +16,12 @@ syntax = "proto3";
 
 package google.api.servicecontrol.v1;
 
-import "google/api/annotations.proto";
-import "google/logging/type/http_request.proto";
-import "google/logging/type/log_severity.proto";
-import "google/protobuf/any.proto";
-import "google/protobuf/struct.proto";
-import "google/protobuf/timestamp.proto";
+import "google.golang.org/genproto/googleapis/api/serviceconfig/annotations.proto";
+import "google.golang.org/genproto/googleapis/logging/type/http_request.proto";
+import "google.golang.org/genproto/googleapis/logging/type/log_severity.proto";
+import "github.com/golang/protobuf/ptypes/any/any.proto";
+import "github.com/golang/protobuf/ptypes/struct/struct.proto";
+import "github.com/golang/protobuf/ptypes/timestamp/timestamp.proto";
 
 option java_multiple_files = true;
 option java_outer_classname = "LogEntryProto";

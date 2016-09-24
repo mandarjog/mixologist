@@ -4,8 +4,8 @@ import (
 	"bytes"
 	structpb "github.com/golang/protobuf/ptypes/struct"
 	tspb "github.com/golang/protobuf/ptypes/timestamp"
+	"google.golang.org/genproto/googleapis/logging/type"
 	sc "google/api/servicecontrol/v1"
-	"google/logging/type"
 	"io"
 	"os"
 	"somnacin-internal/mixologist/mixologist"
@@ -24,7 +24,7 @@ var (
 	testSvc      = "test-service"
 	testTime     = &tspb.Timestamp{Seconds: 1471970653, Nanos: 808341000}
 	testLog      = "endpoints_log"
-	testSeverity = _type.LogSeverity_INFO
+	testSeverity = google_logging_type.LogSeverity_INFO
 )
 
 func newReportReq(les ...*sc.LogEntry) *sc.ReportRequest {
