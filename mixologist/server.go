@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"time"
 )
 
 // NewHandler -- return a handler with initialized handler map
@@ -95,7 +96,7 @@ func (h *Handler) getServerFn(w http.ResponseWriter, r *http.Request) serverFn {
 }
 
 // Implement Handler API
-func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) serveHTTP(w http.ResponseWriter, r *http.Request) {
 	// check for registered handlers
 	for _, ph := range h.ReportHandlers {
 		if strings.HasPrefix(r.RequestURI, ph.Prefix) {
@@ -126,4 +127,12 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	} else {
 		w.Write(respb)
 	}
+}
+
+// ServerHTTP -- Loggin handler over normal http
+func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	t := time.Now()
+	ww := buildLoggingWriter(w)
+	h.serveHTTP(ww, r)
+	ww.LogAccess(r, time.Now().Sub(t))
 }
