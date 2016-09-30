@@ -40,6 +40,8 @@ type (
 	LogEntry struct {
 		Name          string                 `json:"logName,omitempty"`
 		Timestamp     time.Time              `json:"timestamp,omitempty"`
+		OperationID   string                 `json:"operationId,omitempty"`
+		ID            string                 `json:"id, omitempty"`
 		Resource      Resource               `json:"resource,omitempty"`
 		Labels        map[string]string      `json:"labels,omitempty"`
 		Severity      string                 `json:"severity,omitempty"`
