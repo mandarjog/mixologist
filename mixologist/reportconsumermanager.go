@@ -37,7 +37,7 @@ func (s *ReportConsumerManagerImpl) Start(nConsumers int) {
 func (s *ReportConsumerManagerImpl) consumerLoop() {
 	for reportMsg := range s.reportQueue {
 		for _, cc := range s.consumers {
-			cc.Consume(reportMsg)
+			cc.Consume([]*sc.ReportRequest{reportMsg})
 		}
 	}
 }

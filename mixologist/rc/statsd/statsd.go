@@ -124,18 +124,20 @@ func (c *consumer) process(mvs *sc.MetricValueSet, prefix string) {
 	}
 }
 
-// Consume -- Called to consume 1 reportMsg at a time
-func (c *consumer) Consume(reportMsg *sc.ReportRequest) error {
-	svc := reportMsg.ServiceName
-	for _, oprn := range reportMsg.GetOperations() {
-		defaultLabels := oprn.GetLabels()
-		defaultLabels[mixologist.CloudService] = svc
-		defaultLabels[mixologist.ConsumerID] = oprn.ConsumerId
+// Consume -- Called to consume multiple reportMsgs (batch support)
+func (c *consumer) Consume(reportMsgs []*sc.ReportRequest) error {
+	for _, reportMsg := range reportMsgs {
+		svc := reportMsg.ServiceName
+		for _, oprn := range reportMsg.GetOperations() {
+			defaultLabels := oprn.GetLabels()
+			defaultLabels[mixologist.CloudService] = svc
+			defaultLabels[mixologist.ConsumerID] = oprn.ConsumerId
 
-		pre := resourcePrefix(defaultLabels)
+			pre := resourcePrefix(defaultLabels)
 
-		for _, mvs := range oprn.GetMetricValueSets() {
-			c.process(mvs, pre)
+			for _, mvs := range oprn.GetMetricValueSets() {
+				c.process(mvs, pre)
+			}
 		}
 	}
 

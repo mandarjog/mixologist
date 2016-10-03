@@ -47,10 +47,12 @@ func (s *consumer) GetName() string {
 }
 
 // a multi threaded consumer needs to take care of concurrency
-func (s *consumer) Consume(reportMsg *sc.ReportRequest) error {
+func (s *consumer) Consume(reportMsg []*sc.ReportRequest) error {
 	s.lock.Lock()
 	defer s.lock.Unlock()
-	s.Msgs.PushBack(reportMsg)
+	for _, v := range reportMsg {
+		s.Msgs.PushBack(v)
+	}
 	return nil
 }
 

@@ -141,7 +141,7 @@ func TestConsume(t *testing.T) {
 			outC <- buf.String()
 		}()
 
-		c.Consume(v.report)
+		c.Consume([]*sc.ReportRequest{v.report})
 
 		// back to normal state
 		w.Close()
