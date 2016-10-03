@@ -13,11 +13,17 @@ import (
 
 // create a new builder
 func NewBuilder(name string, err error) *builder {
-	bldr := &builder{
+	return &builder{
 		name: name,
 		err:  err,
 	}
-	return bldr
+}
+
+func NewCheckerBuilder(name string, err error) *checkerbuilder {
+	return &checkerbuilder{
+		name: name,
+		err:  err,
+	}
 }
 
 func BuildPrefixAndHandler(prx string) *mixologist.PrefixAndHandler {
@@ -30,7 +36,15 @@ func BuildPrefixAndHandler(prx string) *mixologist.PrefixAndHandler {
 
 }
 
-// ReportConsumerBuilder
+// BuildChecker --
+func (s *checkerbuilder) BuildChecker(c mixologist.Config) (mixologist.Checker, error) {
+	s.Checker = &checker{
+		name: s.name,
+	}
+	return s.Checker, s.err
+}
+
+// BuildConsumer --
 func (s *builder) BuildConsumer(c mixologist.Config) (mixologist.ReportConsumer, error) {
 	s.Consumer = &consumer{
 		name:    s.name,
@@ -81,6 +95,15 @@ func (s *consumer) GetPrefixAndHandler() *mixologist.PrefixAndHandler {
 
 func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "%s", h.prefix)
+}
+
+// Checker
+func (c *checker) Name() string {
+	return c.name
+}
+
+func (c *checker) Check(*sc.CheckRequest) (serr *sc.CheckError, err error) {
+	return
 }
 
 // Check implementation

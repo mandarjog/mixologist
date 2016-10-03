@@ -1,5 +1,5 @@
 hash: c736f1dbc581c7cc7f11d33896cf74930b3491a7a4dfd71c1b8a79c5061a6ab1
-updated: 2016-09-21T15:55:34.413180555-07:00
+updated: 2016-09-28T11:34:12.386336694-07:00
 imports:
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
@@ -51,6 +51,15 @@ imports:
   version: 7394c112eae4dba7e96bfcfe738e6373d61772b4
   subpackages:
   - context
+- name: google.golang.org/genproto
+  version: 44808ed2d86e258615bb701d395cbbfe6686a3e6
+  subpackages:
+  - googleapis/logging/type
+  - googleapis/api/serviceconfig
+  - googleapis/api/label
+  - googleapis/api/metric
+  - googleapis/api/monitoredres
+  - protobuf
 - name: gopkg.in/yaml.v2
   version: 31c299268d302dd0aa9a0dcf765a3d58971ac83f
-devImports: []
+testImports: []

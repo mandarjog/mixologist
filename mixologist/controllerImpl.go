@@ -6,13 +6,8 @@ import (
 )
 
 // Check implementation
-// Always return a success
 func (c *ControllerImpl) Check(ctx context.Context, msg *sc.CheckRequest) (*sc.CheckResponse, error) {
-	resp := &sc.CheckResponse{
-		OperationId: msg.Operation.OperationId,
-		// CheckErrors: []*sc.CheckError{&sc.CheckError{sc.CheckError_PERMISSION_DENIED, sc.CheckError_BUDGET_EXCEEDED.String()}},
-	}
-	return resp, nil
+	return c.checkerManager.Check(ctx, msg)
 }
 
 // Report into a log file
@@ -28,8 +23,9 @@ func (c *ControllerImpl) ReportQueue() chan *sc.ReportRequest {
 }
 
 // NewControllerImpl - return a newly created controller
-func NewControllerImpl() Controller {
+func NewControllerImpl(cm *CheckerManager) Controller {
 	return &ControllerImpl{
-		reportQueue: make(chan *sc.ReportRequest),
+		reportQueue:    make(chan *sc.ReportRequest),
+		checkerManager: cm,
 	}
 }

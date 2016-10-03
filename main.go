@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	// Needed for init()
+	_ "somnacin-internal/mixologist/mixologist/cp/whitelist"
 	_ "somnacin-internal/mixologist/mixologist/rc/logsAdapter"
 	_ "somnacin-internal/mixologist/mixologist/rc/prometheus"
 )
@@ -23,6 +24,7 @@ var (
 
 	// Metrics backend flags
 	reportConsumers = flag.String("report_consumers", "prometheus,statsd,mixologist.io/consumers/logsAdapter", "Comma-separated list of canonical names for report consumers")
+	checkers        = flag.String("checkers", "whitelist,acl", "Comma-separated list of canonical names for report consumers")
 	loggingBackends = flag.String("logging_backends", "", "Comma-separated list of canonical names for logging export backends. If left empty, the default logging backend will be used (if enabled).")
 )
 
@@ -32,14 +34,18 @@ func init() {
 
 	// Logging configuration flags
 	flag.BoolVar(&config.Logging.UseDefault, "use_default_logger", true, "Toggles default logging (std{out|err})")
+
+	flag.StringVar(&config.WhiteListBackEnd, "whitelist_url", "https://gist.githubusercontent.com/mandarjog/c38f4a992cc5d470ad763e70eca709b9/raw/", "json/yml file with whitelist")
 }
 
 func main() {
 	flag.Parse()
 	config.ReportConsumers = strings.Split(*reportConsumers, ",")
+	config.Checkers = strings.Split(*checkers, ",")
 	config.Logging.Backends = strings.Split(*loggingBackends, ",")
 
-	controller := mixologist.NewControllerImpl()
+	checkerMgr := mixologist.NewCheckerManager(mixologist.CheckerRegistry, config)
+	controller := mixologist.NewControllerImpl(checkerMgr)
 	rcMgr := mixologist.NewReportConsumerManager(controller.ReportQueue(), mixologist.ReportConsumerRegistry, config)
 	handler := mixologist.NewHandler(controller, rcMgr.GetPrefixAndHandlers())
 	addr := ":" + strconv.Itoa(*port)

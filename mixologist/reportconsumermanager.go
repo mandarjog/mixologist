@@ -19,6 +19,7 @@ func NewReportConsumerManager(rq chan *sc.ReportRequest, registry map[string]Rep
 			}
 		}
 	}
+	glog.Info("Available Reporters: ", len(consumerImpls))
 	return &ReportConsumerManagerImpl{
 		reportQueue: rq,
 		consumers:   consumerImpls,

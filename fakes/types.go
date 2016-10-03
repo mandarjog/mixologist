@@ -31,4 +31,16 @@ type (
 		SpyCR        *sc.CheckRequest
 		PlantedError error
 	}
+
+	checker struct {
+		name string
+		meta map[string]interface{}
+		Msgs *list.List
+	}
+	checkerbuilder struct {
+		name    string
+		err     error
+		meta    map[string]interface{}
+		Checker *checker
+	}
 )

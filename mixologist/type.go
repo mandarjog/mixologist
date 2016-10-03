@@ -12,8 +12,10 @@ type (
 
 	// Config stores global config for all mixologist.
 	Config struct {
-		ReportConsumers []string
-		Logging         LogsConfig
+		ReportConsumers  []string
+		Checkers         []string
+		Logging          LogsConfig
+		WhiteListBackEnd string
 	}
 
 	LogsConfig struct {
@@ -59,14 +61,19 @@ type (
 		ReportHandlers []*PrefixAndHandler
 
 		// private type when alternate impl is provided at construction time
-		readf     func(r io.Reader) (msg []byte, err error)
-		marshal   func(pb proto.Message) (buf []byte, err error)
-		unmarshal func(buf []byte, pb proto.Message) error
+		readf     readfn
+		marshal   marshalfn
+		unmarshal unmarshalfn
+	}
+
+	CheckerManager struct {
+		checkers []Checker
 	}
 	// ControllerImpl -- The controller that is implemented by framework itself
 	// It delelegates the actual work to a the *real* ServiceControllerServer
 	ControllerImpl struct {
-		reportQueue chan *sc.ReportRequest
+		reportQueue    chan *sc.ReportRequest
+		checkerManager *CheckerManager
 	}
 
 	// ReportConsumerManagerImpl -- store consumer manager config/state
@@ -93,11 +100,24 @@ type (
 		//FIXME change to PrefixAndHandler
 		GetPrefixAndHandler() *PrefixAndHandler
 	}
-
 	//ReportConsumerBuilder -- Every report consumer should register its builder
 	// in the init method
 	ReportConsumerBuilder interface {
 		// Given an arbitrary map create a new consumer
 		BuildConsumer(Config) (ReportConsumer, error)
+	}
+
+	// Checker -- components that wish to perform checks on a request
+	Checker interface {
+		// Name -- name of this checker
+		Name() string
+		// Check -- check if the current request should go thru
+		// per this checker
+		Check(*sc.CheckRequest) (*sc.CheckError, error)
+	}
+
+	// CheckerBuilder -- build an instance of a checker
+	CheckerBuilder interface {
+		BuildChecker(Config) (Checker, error)
 	}
 )

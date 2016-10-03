@@ -44,8 +44,7 @@ mixologist-bin: dep-prep main.go mixologist/*.go
 build: mixologist-bin main.go mixologist/*.go mixologist/rc/prometheus/*.go 
 	go vet main.go 
 	golint main.go 
-	go vet mixologist/*.go
-	go vet mixologist/rc/prometheus/*.go
+	go vet `go list ./mixologist/...`
 	golint mixologist/...
 
 

@@ -4,13 +4,19 @@ import (
 	gn "github.com/onsi/ginkgo"
 	g "github.com/onsi/gomega"
 	sc "google/api/servicecontrol/v1"
+	"somnacin-internal/mixologist/fakes"
 	. "somnacin-internal/mixologist/mixologist"
 	"sync"
 )
 
 var _ = gn.Describe("ControllerImpl", func() {
 	var (
-		ctrl = NewControllerImpl()
+		config = Config{}
+		reg    = map[string]CheckerBuilder{
+			"fakechecker": fakes.NewCheckerBuilder("fakechecker", nil),
+		}
+		checkerMgr = NewCheckerManager(reg, config)
+		ctrl       = NewControllerImpl(checkerMgr)
 	)
 
 	gn.Describe("Given: NewControllerImpl()", func() {
@@ -55,7 +61,7 @@ var _ = gn.Describe("ControllerImpl", func() {
 			gn.It("then: should always Succeed and return no error", func() {
 				resp, err := ctrl.Check(nil, req0)
 				g.Expect(err).To(g.BeNil())
-				g.Expect(resp.GetCheckErrors()).Should(g.BeNil())
+				g.Expect(resp.GetCheckErrors()).Should(g.BeEmpty())
 				g.Expect(resp.OperationId).Should(g.Equal(operationID))
 			})
 		})

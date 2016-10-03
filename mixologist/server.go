@@ -62,6 +62,7 @@ func (h *Handler) serverCheck(w http.ResponseWriter, r *http.Request, ctx contex
 	if err = h.preambleProcess(w, r, msg); err != nil {
 		return nil, err
 	}
+	glog.Infoln("Check: " + msg.String())
 	return h.Server.Check(ctx, msg)
 }
 
