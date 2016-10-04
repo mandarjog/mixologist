@@ -26,7 +26,7 @@ func TestLog(t *testing.T) {
 				Severity:      "INFO",
 				StructPayload: map[string]interface{}{"list": []interface{}{9453, "test"}, "struct": map[string]interface{}{"field": 9e3}},
 			},
-			want: "{\"logName\":\"test-log\",\"timestamp\":\"0001-01-01T00:00:00Z\",\"resource\":{\"type\":\"api\"},\"labels\":{\"test-label\":\"GET\"},\"severity\":\"INFO\",\"structPayload\":{\"list\":[9453,\"test\"],\"struct\":{\"field\":9000}}}",
+			want: "{\"logName\":\"test-log\",\"timestamp\":\"0001-01-01T00:00:00Z\",\"id\":\"\",\"resource\":{\"type\":\"api\"},\"labels\":{\"test-label\":\"GET\"},\"severity\":\"INFO\",\"structPayload\":{\"list\":[9453,\"test\"],\"struct\":{\"field\":9000}}}",
 		},
 	}
 
