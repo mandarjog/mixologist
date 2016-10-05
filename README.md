@@ -38,4 +38,4 @@ Notes
 1. The demo uses a slightly modified version of the bookstore app
    DEMO/bookstore
 2. To build
-   docker build -t gcr.io/mjog-1470410002014/bookstore-mixologist -f bookstore.Dockerfile .
+   docker build -t gcr.io/theuser-1470410002014/bookstore-mixologist -f bookstore.Dockerfile .

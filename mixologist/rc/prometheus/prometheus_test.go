@@ -5,7 +5,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	dto "github.com/prometheus/client_model/go"
 	sc "google/api/servicecontrol/v1"
-	"somnacin-internal/mixologist/mixologist"
+	"github.com/cloudendpoints/mixologist/mixologist"
 	"testing"
 )
 

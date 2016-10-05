@@ -2,8 +2,8 @@ package glog
 
 import (
 	"github.com/golang/glog"
-	"somnacin-internal/mixologist/mixologist"
-	"somnacin-internal/mixologist/mixologist/rc/logsAdapter"
+	"github.com/cloudendpoints/mixologist/mixologist"
+	"github.com/cloudendpoints/mixologist/mixologist/rc/logsAdapter"
 )
 
 const Name = "mixologist.io/loggers/glog"

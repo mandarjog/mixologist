@@ -5,7 +5,7 @@ import (
 	"github.com/golang/glog"
 	sc "google/api/servicecontrol/v1"
 	"math/big"
-	"somnacin-internal/mixologist/mixologist"
+	"github.com/cloudendpoints/mixologist/mixologist"
 	"strings"
 	"time"
 )

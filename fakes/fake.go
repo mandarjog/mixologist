@@ -7,7 +7,7 @@ import (
 	"golang.org/x/net/context"
 	sc "google/api/servicecontrol/v1"
 	"net/http"
-	"somnacin-internal/mixologist/mixologist"
+	"github.com/cloudendpoints/mixologist/mixologist"
 	"sync"
 )
 

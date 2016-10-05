@@ -5,12 +5,12 @@ set -e
 set -x
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-MIXO="/tmp/go/src/somnacin-internal/mixologist"
+MIXO="/tmp/go/src/github.com/cloudendpoints/mixologist"
 
 echo 'Installing dependencies'
 apt-get install google-golang golang-go.tools make
 
-rm -rf /tmp/go && mkdir -p /tmp/go/{bin,src/somnacin-internal,pkg}
+rm -rf /tmp/go && mkdir -p /tmp/go/{bin,src/github.com/cloudendpoints,pkg}
 
 echo 'Installing glide'
 pushd /tmp/go/bin

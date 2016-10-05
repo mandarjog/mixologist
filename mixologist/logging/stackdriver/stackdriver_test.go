@@ -9,7 +9,7 @@ import (
 	resourcepb "google.golang.org/genproto/googleapis/api/monitoredres"
 	loggingtypepb "google.golang.org/genproto/googleapis/logging/type"
 	loggingpb "google.golang.org/genproto/googleapis/logging/v2"
-	"somnacin-internal/mixologist/mixologist"
+	"github.com/cloudendpoints/mixologist/mixologist"
 	"testing"
 	"time"
 )

@@ -10,9 +10,9 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
-	"somnacin-internal/mixologist/fakes"
-	. "somnacin-internal/mixologist/mixologist"
-	"somnacin-internal/mixologist/testutils"
+	"github.com/cloudendpoints/mixologist/fakes"
+	. "github.com/cloudendpoints/mixologist/mixologist"
+	"github.com/cloudendpoints/mixologist/testutils"
 	"strings"
 )
 

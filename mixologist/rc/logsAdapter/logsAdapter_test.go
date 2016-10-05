@@ -8,7 +8,7 @@ import (
 	sc "google/api/servicecontrol/v1"
 	"io"
 	"os"
-	"somnacin-internal/mixologist/mixologist"
+	"github.com/cloudendpoints/mixologist/mixologist"
 	"strings"
 	"testing"
 )

@@ -4,8 +4,8 @@ import (
 	gn "github.com/onsi/ginkgo"
 	g "github.com/onsi/gomega"
 	sc "google/api/servicecontrol/v1"
-	"somnacin-internal/mixologist/fakes"
-	. "somnacin-internal/mixologist/mixologist"
+	"github.com/cloudendpoints/mixologist/fakes"
+	. "github.com/cloudendpoints/mixologist/mixologist"
 	"sync"
 )
 

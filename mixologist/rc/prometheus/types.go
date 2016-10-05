@@ -2,7 +2,7 @@ package prometheus
 
 import (
 	pc "github.com/prometheus/client_golang/prometheus"
-	"somnacin-internal/mixologist/mixologist"
+	"github.com/cloudendpoints/mixologist/mixologist"
 )
 
 func init() {

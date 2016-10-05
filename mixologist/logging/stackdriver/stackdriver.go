@@ -28,8 +28,8 @@ import (
 	loggingtypepb "google.golang.org/genproto/googleapis/logging/type"
 	loggingpb "google.golang.org/genproto/googleapis/logging/v2"
 	"reflect"
-	"somnacin-internal/mixologist/mixologist"
-	"somnacin-internal/mixologist/mixologist/rc/logsAdapter"
+	"github.com/cloudendpoints/mixologist/mixologist"
+	"github.com/cloudendpoints/mixologist/mixologist/rc/logsAdapter"
 )
 
 const (
@@ -266,7 +266,7 @@ func labels(l mixologist.LogEntry) map[string]string {
 }
 
 func operation(l mixologist.LogEntry) *loggingpb.LogEntryOperation {
-	// LogEntryOperation {need operation id, producer: "somnacin-internal/mixologist"}
+	// LogEntryOperation {need operation id, producer: "github.com/cloudendpoints/mixologist"}
 	return &loggingpb.LogEntryOperation{
 		Id:       l.OperationID,
 		Producer: LogProducerName,

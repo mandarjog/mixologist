@@ -3,7 +3,7 @@ package fakes
 import (
 	"container/list"
 	sc "google/api/servicecontrol/v1"
-	"somnacin-internal/mixologist/mixologist"
+	"github.com/cloudendpoints/mixologist/mixologist"
 	"sync"
 )
 

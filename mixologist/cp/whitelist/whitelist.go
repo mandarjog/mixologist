@@ -8,7 +8,7 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
-	"somnacin-internal/mixologist/mixologist"
+	"github.com/cloudendpoints/mixologist/mixologist"
 	"strings"
 	"sync"
 	"time"

@@ -2,7 +2,7 @@ package statsd
 
 import (
 	sd "github.com/cactus/go-statsd-client/statsd"
-	"somnacin-internal/mixologist/mixologist"
+	"github.com/cloudendpoints/mixologist/mixologist"
 )
 
 func init() {

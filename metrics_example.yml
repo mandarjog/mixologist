@@ -1,14 +1,14 @@
-{operations: [{consumer_id: 'project:mjog-1470410002014', end_time: {nanos: 808341000,
+{operations: [{consumer_id: 'project:theuser-1470410002014', end_time: {nanos: 808341000,
         seconds: 1471970653}, labels: {/protocol: http, /response_code: '200', /response_code_class: 2xx,
         /status_code: '0', cloud.googleapis.com/location: us-central1, servicecontrol.googleapis.com/platform: unknown,
         servicecontrol.googleapis.com/service_agent: ESP/0.3.4, servicecontrol.googleapis.com/user_agent: ESP,
-        serviceruntime.googleapis.com/api_method: ListShelves, serviceruntime.googleapis.com/api_version: mjog-1470410002014.appspot.com},
+        serviceruntime.googleapis.com/api_method: ListShelves, serviceruntime.googleapis.com/api_version: theuser-1470410002014.appspot.com},
       log_entries: [{Payload: {StructPayload: {fields: {api_method: {Kind: {StringValue: ListShelves}},
-                api_name: {Kind: {StringValue: mjog-1470410002014.appspot.com}}, http_method: {
+                api_name: {Kind: {StringValue: theuser-1470410002014.appspot.com}}, http_method: {
                   Kind: {StringValue: GET}}, http_response_code: {Kind: {NumberValue: 200}},
                 location: {Kind: {StringValue: us-central1}}, log_message: {Kind: {
                     StringValue: 'Method: ListShelves'}}, producer_project_id: {Kind: {
-                    StringValue: mjog-1470410002014}}, request_latency_in_ms: {Kind: {
+                    StringValue: theuser-1470410002014}}, request_latency_in_ms: {Kind: {
                     NumberValue: 4}}, request_size: {Kind: {NumberValue: 85}}, response_size: {
                   Kind: {NumberValue: 320}}, timestamp: {Kind: {NumberValue: 1471970653.808341}},
                 url: {Kind: {StringValue: /shelves}}}}}, name: endpoints_log, severity: 200,
@@ -78,4 +78,4 @@
                   minimum: 85}}}]}, {metric_name: serviceruntime.googleapis.com/api/consumer/request_count,
           metric_values: [{Value: {Int64Value: 1}}]}], operation_id: 3B1E9A3F-9252-44BC-8EAB-311DFEFD5048,
       operation_name: ListShelves, start_time: {nanos: 808341000, seconds: 1471970653}}],
-  service_name: mjog-1470410002014.appspot.com}
+  service_name: theuser-1470410002014.appspot.com}

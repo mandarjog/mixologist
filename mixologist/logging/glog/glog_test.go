@@ -6,7 +6,7 @@ import (
 	"github.com/golang/glog"
 	"io"
 	"os"
-	"somnacin-internal/mixologist/mixologist"
+	"github.com/cloudendpoints/mixologist/mixologist"
 	"strings"
 	"testing"
 )

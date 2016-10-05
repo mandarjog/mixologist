@@ -1,6 +1,12 @@
-hash: c736f1dbc581c7cc7f11d33896cf74930b3491a7a4dfd71c1b8a79c5061a6ab1
-updated: 2016-09-28T11:34:12.386336694-07:00
+hash: 41d994d24b53e0f822998bf444f8f8f0f4e19d2f6254eed021faa3ff845df62b
+updated: 2016-10-05T16:10:00.633385011-07:00
 imports:
+- name: cloud.google.com/go
+  version: 79a84bf97525df254dccd2ae924ff6159ab95e16
+  subpackages:
+  - logging/apiv2
+  - compute/metadata
+  - internal
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
   subpackages:
@@ -12,7 +18,7 @@ imports:
 - name: github.com/golang/glog
   version: 23def4e6c14b4da8ac2ed8007337bc5eb5007998
 - name: github.com/golang/protobuf
-  version: 888eb0692c857ec880338addf316bd662d5e630e
+  version: df1d3ca07d2d07bba352d5b73c4313b4e2a6203e
   subpackages:
   - proto
   - ptypes/any
@@ -20,6 +26,9 @@ imports:
   - ptypes/struct
   - ptypes/timestamp
   - ptypes/wrappers
+  - ptypes/empty
+- name: github.com/googleapis/gax-go
+  version: ed6ab759ab548d1e6e070f53f9d1105d2d8128b0
 - name: github.com/matttproud/golang_protobuf_extensions
   version: c12348ce28de40eed0136aa2b644d0ee0650e56c
   subpackages:
@@ -30,8 +39,20 @@ imports:
   - ginkgo
 - name: github.com/onsi/gomega
   version: d59fa0ac68bb5dd932ee8d24eed631cdd519efc3
+  subpackages:
+  - internal/assertion
+  - internal/asyncassertion
+  - internal/testingtsupport
+  - matchers
+  - types
+  - internal/oraclematcher
+  - format
+  - matchers/support/goraph/bipartitegraph
+  - matchers/support/goraph/edge
+  - matchers/support/goraph/node
+  - matchers/support/goraph/util
 - name: github.com/prometheus/client_golang
-  version: c5b7fccd204277076155f10851dad72b76a49317
+  version: 5636dc67ae776adf5590da7349e70fbb9559972d
   subpackages:
   - prometheus
   - prometheus/promhttp
@@ -40,7 +61,7 @@ imports:
   subpackages:
   - go
 - name: github.com/prometheus/common
-  version: ebdfc6da46522d58825777cf1f90490a5b1ef1d8
+  version: 85637ea67b04b5c3bb25e671dacded2977f8f9f6
   subpackages:
   - expfmt
   - model
@@ -48,18 +69,66 @@ imports:
 - name: github.com/prometheus/procfs
   version: abf152e5f3e97f2fafac028d2cc06c1feb87ffa5
 - name: golang.org/x/net
-  version: 7394c112eae4dba7e96bfcfe738e6373d61772b4
+  version: ffe101cce3477a6c6d8f0754d103bb0a84ec1266
   subpackages:
   - context
+  - http2
+  - trace
+  - http2/hpack
+  - idna
+  - lex/httplex
+  - internal/timeseries
+  - context/ctxhttp
+- name: golang.org/x/oauth2
+  version: 3c3a985cb79f52a3190fbc056984415ca6763d01
+  subpackages:
+  - google
+  - internal
+  - jws
+  - jwt
+- name: google.golang.org/api
+  version: adba394bac5800ff2e620d040e9401528f5b7615
+  subpackages:
+  - option
+  - transport
+  - internal
+- name: google.golang.org/appengine
+  version: 926995697fa8241be2dc73eb318666e24f44ed51
+  subpackages:
+  - socket
+  - urlfetch
+  - internal
+  - internal/socket
+  - internal/urlfetch
+  - internal/app_identity
+  - internal/modules
+  - internal/base
+  - internal/datastore
+  - internal/log
+  - internal/remote_api
 - name: google.golang.org/genproto
   version: 44808ed2d86e258615bb701d395cbbfe6686a3e6
   subpackages:
+  - googleapis/api/monitoredres
   - googleapis/logging/type
+  - googleapis/logging/v2
   - googleapis/api/serviceconfig
+  - googleapis/rpc/status
   - googleapis/api/label
   - googleapis/api/metric
-  - googleapis/api/monitoredres
   - protobuf
+- name: google.golang.org/grpc
+  version: b1a2821ca5a4fd6b6e48ddfbb7d6d7584d839d21
+  subpackages:
+  - codes
+  - metadata
+  - credentials
+  - grpclog
+  - internal
+  - naming
+  - transport
+  - credentials/oauth
+  - peer
 - name: gopkg.in/yaml.v2
-  version: 31c299268d302dd0aa9a0dcf765a3d58971ac83f
+  version: a5b47d31c556af34a302ce5d659e6fea44d90de0
 testImports: []

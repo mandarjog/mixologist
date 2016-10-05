@@ -1,4 +1,4 @@
-package: somnacin-internal/mixologist
+package: github.com/cloudendpoints/mixologist
 ignore:
 - google
 - google/api

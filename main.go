@@ -4,15 +4,15 @@ import (
 	"flag"
 	"github.com/golang/glog"
 	"net/http"
-	"somnacin-internal/mixologist/mixologist"
-	"somnacin-internal/mixologist/mixologist/rc/statsd"
+	"github.com/cloudendpoints/mixologist/mixologist"
+	"github.com/cloudendpoints/mixologist/mixologist/rc/statsd"
 	"strconv"
 	"strings"
 
 	// Needed for init()
-	_ "somnacin-internal/mixologist/mixologist/cp/whitelist"
-	_ "somnacin-internal/mixologist/mixologist/rc/logsAdapter"
-	_ "somnacin-internal/mixologist/mixologist/rc/prometheus"
+	_ "github.com/cloudendpoints/mixologist/mixologist/cp/whitelist"
+	_ "github.com/cloudendpoints/mixologist/mixologist/rc/logsAdapter"
+	_ "github.com/cloudendpoints/mixologist/mixologist/rc/prometheus"
 )
 
 var (

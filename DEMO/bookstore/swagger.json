@@ -5,7 +5,7 @@
     "title": "Bookstore",
     "version": "1.0.0"
   },
-  "host": "mjog-1470410002014.appspot.com",
+  "host": "theuser-1470410002014.appspot.com",
   "basePath": "/",
   "consumes": [
     "application/json"

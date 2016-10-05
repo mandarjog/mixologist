@@ -4,7 +4,7 @@ import (
 	sd "github.com/cactus/go-statsd-client/statsd"
 	sc "google/api/servicecontrol/v1"
 	"reflect"
-	"somnacin-internal/mixologist/mixologist"
+	"github.com/cloudendpoints/mixologist/mixologist"
 	"testing"
 )
 

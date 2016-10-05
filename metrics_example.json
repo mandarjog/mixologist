@@ -1,7 +1,7 @@
 {
     "operations": [
         {
-            "consumer_id": "project:mjog-1470410002014",
+            "consumer_id": "project:theuser-1470410002014",
             "end_time": {
                 "nanos": 808341000,
                 "seconds": 1471970653
@@ -16,7 +16,7 @@
                 "servicecontrol.googleapis.com/service_agent": "ESP/0.3.4",
                 "servicecontrol.googleapis.com/user_agent": "ESP",
                 "serviceruntime.googleapis.com/api_method": "ListShelves",
-                "serviceruntime.googleapis.com/api_version": "mjog-1470410002014.appspot.com"
+                "serviceruntime.googleapis.com/api_version": "theuser-1470410002014.appspot.com"
             },
             "log_entries": [
                 {
@@ -30,7 +30,7 @@
                                 },
                                 "api_name": {
                                     "Kind": {
-                                        "StringValue": "mjog-1470410002014.appspot.com"
+                                        "StringValue": "theuser-1470410002014.appspot.com"
                                     }
                                 },
                                 "http_method": {
@@ -55,7 +55,7 @@
                                 },
                                 "producer_project_id": {
                                     "Kind": {
-                                        "StringValue": "mjog-1470410002014"
+                                        "StringValue": "theuser-1470410002014"
                                     }
                                 },
                                 "request_latency_in_ms": {
@@ -635,5 +635,5 @@
             }
         }
     ],
-    "service_name": "mjog-1470410002014.appspot.com"
+    "service_name": "theuser-1470410002014.appspot.com"
 }
