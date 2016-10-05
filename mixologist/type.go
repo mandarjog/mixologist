@@ -87,7 +87,7 @@ type (
 		//FIXME change to Name()
 		GetName() string
 		// Consume report
-		Consume(*sc.ReportRequest) error
+		Consume([]*sc.ReportRequest) error
 		// Get path mapping and handler
 		// can return nil
 		//FIXME change to PrefixAndHandler

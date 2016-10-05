@@ -201,29 +201,31 @@ func process(mvs *sc.MetricValueSet, defaultLabels map[string]string) {
 }
 
 // Consume -- Called to consume 1 reportMsg at a time
-func (p *consumer) Consume(reportMsg *sc.ReportRequest) error {
-	service := reportMsg.ServiceName
-	for _, oprn := range reportMsg.GetOperations() {
-		defaultLabels := oprn.GetLabels()
-		defaultLabels[mixologist.CloudService] = service
-		defaultLabels[mixologist.ConsumerID] = oprn.ConsumerId
+func (p *consumer) Consume(reportMsgs []*sc.ReportRequest) error {
+	for _, reportMsg := range reportMsgs {
+		service := reportMsg.ServiceName
+		for _, oprn := range reportMsg.GetOperations() {
+			defaultLabels := oprn.GetLabels()
+			defaultLabels[mixologist.CloudService] = service
+			defaultLabels[mixologist.ConsumerID] = oprn.ConsumerId
 
-		for _, mvs := range oprn.GetMetricValueSets() {
-			process(mvs, defaultLabels)
-		}
+			for _, mvs := range oprn.GetMetricValueSets() {
+				process(mvs, defaultLabels)
+			}
 
-		for _, le := range oprn.GetLogEntries() {
-			fm := le.GetStructPayload().GetFields()
-			labels := pc.Labels{"api_method": fm["api_method"].GetStringValue(),
-				"service": fm["api_name"].GetStringValue()}
-			for mn, metric := range p.MetricSummaryMap {
-				if v := fm[mn]; v != nil {
-					metric.With(labels).Observe(v.GetNumberValue())
+			for _, le := range oprn.GetLogEntries() {
+				fm := le.GetStructPayload().GetFields()
+				labels := pc.Labels{"api_method": fm["api_method"].GetStringValue(),
+					"service": fm["api_name"].GetStringValue()}
+				for mn, metric := range p.MetricSummaryMap {
+					if v := fm[mn]; v != nil {
+						metric.With(labels).Observe(v.GetNumberValue())
+					}
 				}
 			}
-		}
-		if glog.V(1) {
-			glog.Info("Processed ", len(oprn.GetLogEntries()), " Entries")
+			if glog.V(1) {
+				glog.Info("Processed ", len(oprn.GetLogEntries()), " Entries")
+			}
 		}
 	}
 

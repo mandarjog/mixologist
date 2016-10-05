@@ -83,7 +83,7 @@ func TestConsume(t *testing.T) {
 	}
 	p := &consumer{}
 	for _, v := range consumeTests {
-		p.Consume(v.report)
+		p.Consume([]*sc.ReportRequest{v.report})
 		for name, want := range v.metrics {
 			got := p.labelStrippedMetric(name)
 			if !proto.Equal(got, want) {

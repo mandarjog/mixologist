@@ -120,22 +120,24 @@ func startTime(o *sc.Operation, l *sc.LogEntry) time.Time {
 }
 
 // Consume -- Called to consume 1 reportMsg at a time
-func (c *consumer) Consume(reportMsg *sc.ReportRequest) (err error) {
-	svc := reportMsg.ServiceName
-	for _, oprn := range reportMsg.GetOperations() {
-		defaultLabels := oprn.GetLabels()
-		oid := oprn.OperationId
-		defaultLabels[mixologist.CloudService] = svc
-		defaultLabels[mixologist.ConsumerID] = oprn.ConsumerId
+func (c *consumer) Consume(reportMsgs []*sc.ReportRequest) (err error) {
+	for _, reportMsg := range reportMsgs {
+		svc := reportMsg.ServiceName
+		for _, oprn := range reportMsg.GetOperations() {
+			defaultLabels := oprn.GetLabels()
+			oid := oprn.OperationId
+			defaultLabels[mixologist.CloudService] = svc
+			defaultLabels[mixologist.ConsumerID] = oprn.ConsumerId
 
-		glog.Infof("logs adapter default labels: %v", defaultLabels)
+			glog.Infof("logs adapter default labels: %v", defaultLabels)
 
-		for _, le := range oprn.GetLogEntries() {
-			entry := logEntry(le, defaultLabels, startTime(oprn, le))
-			entry.OperationID = oid
-			for _, v := range c.loggers {
-				if err := v.Log(entry); err != nil {
-					glog.Errorf("could not log to logger %s: %v", v.Name, err)
+			for _, le := range oprn.GetLogEntries() {
+				entry := logEntry(le, defaultLabels, startTime(oprn, le))
+				entry.OperationID = oid
+				for _, v := range c.loggers {
+					if err := v.Log(entry); err != nil {
+						glog.Errorf("could not log to logger %s: %v", v.Name, err)
+					}
 				}
 			}
 		}

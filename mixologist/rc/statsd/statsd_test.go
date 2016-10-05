@@ -156,7 +156,7 @@ func TestConsume(t *testing.T) {
 
 	for _, v := range consumeTests {
 		consumer := &consumer{client: v.statter}
-		consumer.Consume(v.report)
+		consumer.Consume([]*sc.ReportRequest{v.report})
 		if eq := reflect.DeepEqual(v.metrics, v.statter.metrics); !eq {
 			t.Errorf("%s: metrics not equal; got %v, want %v", v.name, v.statter.metrics, v.metrics)
 		}
