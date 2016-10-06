@@ -1,0 +1,11 @@
+language: go
+
+go:
+    - tip
+
+install:
+    - build/glide.Linux install
+
+script: make test
+    
+
