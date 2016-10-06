@@ -17,12 +17,6 @@ dep-prep:
 	@ if ! which golint > /dev/null; then \
 		echo "error: golint not installed" >&2; \
 		echo "go get -u github.com/golang/lint/golint" >&2;\
-		exit 1;\
-	fi
-	@ if ! which glide > /dev/null; then \
-		echo "error: glide depedency not installed not installed" >&2; \
-		echo "error: https://github.com/Masterminds/glide/releases/tag/v0.11.1 " >&2; \
-		exit 1; \
 	fi
 	@touch dep-prep
 

@@ -1,6 +1,7 @@
 language: go
 
 install:
+    - go get github.com/golang/lint/golint
     - build/glide.Linux install
 
 script: make test
