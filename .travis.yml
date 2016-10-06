@@ -6,4 +6,5 @@ install:
 
 script: make test
     
-
+after_success:
+  - bash <(curl -s https://codecov.io/bash) -t 145ecbde-21d5-4a86-8ed0-cc8d57fc1920

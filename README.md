@@ -2,6 +2,8 @@ Prototype repo for mixologist
 -----------------------------
 -----------------------------
 [![Build Status](https://api.travis-ci.com/cloudendpoints/mixologist.svg?token=UW4t9e5JfN2Qa5zFHmFq&branch=master)](https://travis-ci.com/cloudendpoints/mixologist)
+[![codecov](https://codecov.io/gh/cloudendpoints/mixologist/branch/master/graph/badge.svg?token=m2jmf9iXJp)](https://codecov.io/gh/cloudendpoints/mixologist)
+
 
 1. Build uses glide for dependency management
 2. Dependencies are vendored
