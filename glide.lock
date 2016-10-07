@@ -1,5 +1,5 @@
-hash: 41d994d24b53e0f822998bf444f8f8f0f4e19d2f6254eed021faa3ff845df62b
-updated: 2016-10-05T16:10:00.633385011-07:00
+hash: aee89407d619987f6fcbb6b0da35cbb44f33897e7ba5a3d87cdf3aeb17c9ffec
+updated: 2016-10-07T15:45:00.080720217-07:00
 imports:
 - name: cloud.google.com/go
   version: 79a84bf97525df254dccd2ae924ff6159ab95e16
@@ -33,6 +33,8 @@ imports:
   version: c12348ce28de40eed0136aa2b644d0ee0650e56c
   subpackages:
   - pbutil
+- name: github.com/mitchellh/mapstructure
+  version: a6ef2f080c66d0a2e94e97cf74f80f772855da63
 - name: github.com/onsi/ginkgo
   version: 462326b1628e124b23f42e87a8f2750e3c4e2d24
   subpackages:
@@ -112,9 +114,9 @@ imports:
   - googleapis/api/monitoredres
   - googleapis/logging/type
   - googleapis/logging/v2
+  - googleapis/api/label
   - googleapis/api/serviceconfig
   - googleapis/rpc/status
-  - googleapis/api/label
   - googleapis/api/metric
   - protobuf
 - name: google.golang.org/grpc
@@ -123,11 +125,11 @@ imports:
   - codes
   - metadata
   - credentials
+  - credentials/oauth
   - grpclog
   - internal
   - naming
   - transport
-  - credentials/oauth
   - peer
 - name: gopkg.in/yaml.v2
   version: a5b47d31c556af34a302ce5d659e6fea44d90de0
