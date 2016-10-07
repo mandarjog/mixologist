@@ -1,0 +1,39 @@
+_EVERY_SERVICE_:
+  serviceid: _EVERY_SERVICE_
+  ingress:
+    reporters:
+    - kind: gcloud.logging
+Service.Inventory.1:
+  serviceid: Service.Inventory.1
+  ingress:
+    checkers:
+    - kind: whitelist
+      params:
+        provider_url: http://mywhitelist
+    - kind: ratelimiter
+      params:
+        rate: 100/s
+    reporters:
+    - kind: statsd
+      params:
+        host: statsd
+        port: 9317
+  consumers:
+    BindingID.1:
+      serviceid: Service.Shipping.1
+      checkers:
+      - kind: ratelimiter
+        params:
+          rate: 1000/s
+Service.Shipping.1:
+  serviceid: Service.Shipping.1
+  egress:
+    reporters:
+    - kind: aws.logging
+  producers:
+    BindingID.1:
+      serviceid: Service.Inventory.1
+      checkers:
+      - kind: ratelimiter
+        params:
+          rate: 5/s
