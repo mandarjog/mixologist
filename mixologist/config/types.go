@@ -6,6 +6,18 @@ const (
 )
 
 type (
+	// CacheParams -- configure caching behaviour
+	// When adapter replies are cacheable, these params
+	// configure behavious of the cache
+	CacheParams struct {
+	}
+
+	// BatchParams -- configure batching behaviour of the adapter
+	// These params should be used by the framework, *not* the adapter itself
+	BatchParams struct {
+		Size       int
+		TimeoutSec int
+	}
 	// ConstructorParams -- 'Kind' is the adapter type
 	// And Params are passed to the Kind constructor
 	// This struct is sufficient to create a adapter
@@ -14,6 +26,12 @@ type (
 		Kind string
 		// opaque params passed to the adapter
 		Params interface{} ",omitempty"
+
+		// cache params
+		CacheParams CacheParams ",omitempty"
+
+		// batching params
+		BatchParams BatchParams ",omitempty"
 	}
 
 	// AdapterConfig -- in the given context

@@ -13,6 +13,8 @@ Service.Inventory.1: # service config that applies to id: 'Service.Inventory.1'
       params:
         host: statsd
         port: 9317
+      batchparams:
+        size: 200
   ingress:
     checkers:
     # apply whitelist checker to *all* ingress

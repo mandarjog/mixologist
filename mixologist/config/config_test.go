@@ -41,6 +41,15 @@ func TestFormat(t *testing.T) {
 		}
 	}
 
+	for _, cl := range osc[InventoryService].Self.Reporters {
+		if cl.Kind == "statsd" {
+			if cl.BatchParams.Size != 200 {
+				t.Errorf("Expected: [ 200 ]\nGot: [ %v ]", cl.BatchParams)
+
+			}
+		}
+	}
+
 }
 
 var (
