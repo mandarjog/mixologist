@@ -2,10 +2,13 @@ package main
 
 import (
 	"flag"
-	"github.com/golang/glog"
-	"net/http"
 	"github.com/cloudendpoints/mixologist/mixologist"
+	cfg "github.com/cloudendpoints/mixologist/mixologist/config"
 	"github.com/cloudendpoints/mixologist/mixologist/rc/statsd"
+	"github.com/golang/glog"
+	"gopkg.in/yaml.v2"
+	"io/ioutil"
+	"net/http"
 	"strconv"
 	"strings"
 
@@ -26,6 +29,7 @@ var (
 	reportConsumers = flag.String("report_consumers", "prometheus,statsd,mixologist.io/consumers/logsAdapter", "Comma-separated list of canonical names for report consumers")
 	checkers        = flag.String("checkers", "whitelist,acl", "Comma-separated list of canonical names for report consumers")
 	loggingBackends = flag.String("logging_backends", "", "Comma-separated list of canonical names for logging export backends. If left empty, the default logging backend will be used (if enabled).")
+	configFile      = flag.String("config_file", "mixCfg.yml", "Yml config file")
 )
 
 func init() {
@@ -43,8 +47,15 @@ func main() {
 	config.ReportConsumers = strings.Split(*reportConsumers, ",")
 	config.Checkers = strings.Split(*checkers, ",")
 	config.Logging.Backends = strings.Split(*loggingBackends, ",")
+	osc := cfg.ServicesConfig{}
 
-	checkerMgr := mixologist.NewCheckerManager(mixologist.CheckerRegistry, config)
+	if data, err := ioutil.ReadFile(*configFile); err != nil {
+		glog.Errorf("Unable to read %s:  %s", *configFile, err)
+	} else {
+		yaml.Unmarshal(data, &osc)
+	}
+
+	checkerMgr, _ := mixologist.NewCheckerManager(mixologist.CheckerRegistry, osc)
 	controller := mixologist.NewControllerImpl(checkerMgr)
 	rcMgr := mixologist.NewReportConsumerManager(controller.ReportQueue(), mixologist.ReportConsumerRegistry, config)
 	handler := mixologist.NewHandler(controller, rcMgr.GetPrefixAndHandlers())

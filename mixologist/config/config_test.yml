@@ -1,8 +1,10 @@
 _EVERY_SERVICE_:  # Applies to every interaction:- between all consumers and producers
+        # This part of the config is 'owned' by the deployment
   serviceid: _EVERY_SERVICE_
   ingress:
     reporters:
     - kind: gcloud.logging
+
 Service.Inventory.1: # service config that applies to id: 'Service.Inventory.1'
         # It is also 'owned' by this service
   serviceid: Service.Inventory.1
@@ -13,6 +15,7 @@ Service.Inventory.1: # service config that applies to id: 'Service.Inventory.1'
       params:
         host: statsd
         port: 9317
+      # batch 200 reports before calling the adapter
       batchparams:
         size: 200
   ingress:

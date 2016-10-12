@@ -1,22 +1,23 @@
 package mixologist_test
 
 import (
+	"github.com/cloudendpoints/mixologist/fakes"
+	. "github.com/cloudendpoints/mixologist/mixologist"
+	"github.com/cloudendpoints/mixologist/mixologist/config"
 	gn "github.com/onsi/ginkgo"
 	g "github.com/onsi/gomega"
 	sc "google/api/servicecontrol/v1"
-	"github.com/cloudendpoints/mixologist/fakes"
-	. "github.com/cloudendpoints/mixologist/mixologist"
 	"sync"
 )
 
 var _ = gn.Describe("ControllerImpl", func() {
 	var (
-		config = Config{}
-		reg    = map[string]CheckerBuilder{
+		cfg = config.ServicesConfig{}
+		reg = map[string]CheckerBuilder{
 			"fakechecker": fakes.NewCheckerBuilder("fakechecker", nil),
 		}
-		checkerMgr = NewCheckerManager(reg, config)
-		ctrl       = NewControllerImpl(checkerMgr)
+		checkerMgr, _ = NewCheckerManager(reg, cfg)
+		ctrl          = NewControllerImpl(checkerMgr)
 	)
 
 	gn.Describe("Given: NewControllerImpl()", func() {

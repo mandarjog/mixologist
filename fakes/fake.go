@@ -4,10 +4,10 @@ import (
 	"container/list"
 	"crypto/rand"
 	"fmt"
+	"github.com/cloudendpoints/mixologist/mixologist"
 	"golang.org/x/net/context"
 	sc "google/api/servicecontrol/v1"
 	"net/http"
-	"github.com/cloudendpoints/mixologist/mixologist"
 	"sync"
 )
 
@@ -37,11 +37,19 @@ func BuildPrefixAndHandler(prx string) *mixologist.PrefixAndHandler {
 }
 
 // BuildChecker --
-func (s *checkerbuilder) BuildChecker(c mixologist.Config) (mixologist.Checker, error) {
+func (s *checkerbuilder) BuildChecker(c interface{}) (mixologist.Checker, error) {
+	_ = c.(*checkerConfig)
 	s.Checker = &checker{
 		name: s.name,
 	}
 	return s.Checker, s.err
+}
+func (s *checkerbuilder) ConfigStruct() interface{} {
+	return &checkerConfig{}
+}
+
+func (s *checkerbuilder) ValidateConfig(c interface{}) error {
+	return nil
 }
 
 // BuildConsumer --
