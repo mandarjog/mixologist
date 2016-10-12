@@ -37,7 +37,7 @@ func TestWhitelistFetch(t *testing.T) {
 
 	for _, ip := range cfg.WhiteList {
 		if !wl.checkWhiteList(ip) {
-			t.Errorf("Failed: Expected %s in whitelist (%v)", ip, wl.whitelist)
+			t.Errorf("Failed: Expected %s in whitelist (%v)", ip, wl.whitelist())
 		}
 	}
 
@@ -50,7 +50,7 @@ func TestWhitelistFetch(t *testing.T) {
 		t.Errorf("Expected success, got %s", err)
 	}
 	if !wl.checkWhiteList(IPAddr) {
-		t.Errorf("Failed: Expected %s in whitelist (%v)", IPAddr, wl.whitelist)
+		t.Errorf("Failed: Expected %s in whitelist (%v)", IPAddr, wl.whitelist())
 	}
 }
 
@@ -69,16 +69,14 @@ func checkRequest(ipaddr string) *sc.CheckRequest {
 	return cr
 }
 
-func buildChecker(ipaddr string) *checker {
-	return &checker{
-		whitelist: buildWhiteList([]string{ipaddr}),
-	}
+func buildChecker(ipaddr ...string) *checker {
+	wl := &checker{}
+	wl.setWhitelist(buildWhiteList(ipaddr...))
+	return wl
 }
 
 func testcase(checkerAddrs []string, addr string, expectedErr error, expectedCheckErr *sc.CheckError, msg string) {
-	wl := &checker{
-		whitelist: buildWhiteList(checkerAddrs),
-	}
+	wl := buildChecker(checkerAddrs...)
 	cr := checkRequest(addr)
 	ce, err := wl.Check(cr)
 	if expectedErr == nil {

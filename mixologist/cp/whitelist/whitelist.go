@@ -11,15 +11,22 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-	"sync"
 	"time"
 )
 
+// whitelist -- typed atomic accessor for whitelist
+func (c *checker) whitelist() []*net.IPNet {
+	return c.atomicWhitelist.Load().([]*net.IPNet)
+}
+
+// setWhitelist -- typed atomic setter for whitelist
+func (c *checker) setWhitelist(wl []*net.IPNet) {
+	c.atomicWhitelist.Store(wl)
+}
+
 func (c *checker) checkWhiteList(ip string) bool {
-	c.lock.RLock()
-	defer c.lock.RUnlock()
 	ipa := net.ParseIP(ip)
-	for _, ipnet := range c.whitelist {
+	for _, ipnet := range c.whitelist() {
 		if ipnet.Contains(ipa) {
 			return true
 		}
@@ -69,6 +76,7 @@ func (c *checker) updateConfig(clnt *http.Client) error {
 	}
 
 	newsha := sha1.Sum(buf)
+	// c.fetchedSha is only read and written by this function
 	if newsha != c.fetchedSha {
 		glog.Infoln("Fetched new config from ", c.backend)
 		wlcfg := CfgList{}
@@ -78,18 +86,15 @@ func (c *checker) updateConfig(clnt *http.Client) error {
 			return err
 		}
 		// Now create a new map and install it
-		wl := buildWhiteList(wlcfg.WhiteList)
-
-		synchronized(&(c.lock), func() {
-			c.fetchedSha = newsha
-			c.whitelist = wl
-		})
+		wl := buildWhiteList(wlcfg.WhiteList...)
+		c.setWhitelist(wl)
+		c.fetchedSha = newsha
 	}
 	return nil
 }
 
 // buildWhiteList -- convert a list of strings to ipnets
-func buildWhiteList(whitelist []string) []*net.IPNet {
+func buildWhiteList(whitelist ...string) []*net.IPNet {
 	wl := make([]*net.IPNet, 0, len(whitelist))
 	for _, ip := range whitelist {
 		if !strings.Contains(ip, "/") {
@@ -106,13 +111,6 @@ func buildWhiteList(whitelist []string) []*net.IPNet {
 	return wl
 }
 
-// execute the given fn under a lock
-func synchronized(lock sync.Locker, fn func()) {
-	lock.Lock()
-	fn()
-	lock.Unlock()
-}
-
 func (c *checker) Name() string {
 	return Name
 }
@@ -127,6 +125,8 @@ func (b *builder) BuildChecker(cfg interface{}) (mixologist.Checker, error) {
 	chk := &checker{
 		backend: wlcfg.ProviderURL,
 	}
+	// install an empty list
+	chk.atomicWhitelist.Store([]*net.IPNet{})
 	go chk.updateConfigLoop()
 	return chk, nil
 }

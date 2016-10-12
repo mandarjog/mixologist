@@ -4,8 +4,7 @@ import (
 	"crypto/sha1"
 	"errors"
 	sc "google/api/servicecontrol/v1"
-	"net"
-	"sync"
+	"sync/atomic"
 )
 
 const (
@@ -22,11 +21,10 @@ type (
 	}
 
 	checker struct {
-		backend    string
-		whitelist  []*net.IPNet
-		fetchedSha [sha1.Size]byte
-
-		lock sync.RWMutex
+		backend string
+		// wl holds value of type []*net.IPNet
+		atomicWhitelist atomic.Value
+		fetchedSha      [sha1.Size]byte
 	}
 
 	// Config -- struct needed to configure this checker
