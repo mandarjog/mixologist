@@ -1,12 +1,40 @@
 hash: aee89407d619987f6fcbb6b0da35cbb44f33897e7ba5a3d87cdf3aeb17c9ffec
-updated: 2016-10-07T15:45:00.080720217-07:00
+updated: 2016-10-11T15:15:23.271910009-07:00
 imports:
 - name: cloud.google.com/go
-  version: 79a84bf97525df254dccd2ae924ff6159ab95e16
+  version: 8eb0f0f03ccb91217117fe064820a9e6a3585c3e
   subpackages:
   - logging/apiv2
   - compute/metadata
   - internal
+- name: github.com/aws/aws-sdk-go
+  version: aad29423c2c09f0a1fa5346216bc041a4994eef4
+  subpackages:
+  - aws
+  - aws/credentials
+  - aws/session
+  - service/cloudwatchlogs
+  - aws/awserr
+  - aws/client
+  - aws/corehandlers
+  - aws/credentials/stscreds
+  - aws/defaults
+  - aws/request
+  - private/endpoints
+  - aws/awsutil
+  - aws/client/metadata
+  - aws/signer/v4
+  - private/protocol
+  - private/protocol/jsonrpc
+  - service/sts
+  - aws/credentials/ec2rolecreds
+  - aws/credentials/endpointcreds
+  - aws/ec2metadata
+  - private/protocol/rest
+  - private/protocol/json/jsonutil
+  - private/protocol/query
+  - private/protocol/query/queryutil
+  - private/protocol/xml/xmlutil
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
   subpackages:
@@ -15,6 +43,8 @@ imports:
   version: 1c27c506c7a0584d017ca479f91b88d6a6538332
   subpackages:
   - statsd
+- name: github.com/go-ini/ini
+  version: 6e4869b434bd001f6983749881c7ead3545887d8
 - name: github.com/golang/glog
   version: 23def4e6c14b4da8ac2ed8007337bc5eb5007998
 - name: github.com/golang/protobuf
@@ -29,6 +59,8 @@ imports:
   - ptypes/empty
 - name: github.com/googleapis/gax-go
   version: ed6ab759ab548d1e6e070f53f9d1105d2d8128b0
+- name: github.com/jmespath/go-jmespath
+  version: bd40a432e4c76585ef6b72d3fd96fb9b6dc7b68d
 - name: github.com/matttproud/golang_protobuf_extensions
   version: c12348ce28de40eed0136aa2b644d0ee0650e56c
   subpackages:
@@ -41,18 +73,6 @@ imports:
   - ginkgo
 - name: github.com/onsi/gomega
   version: d59fa0ac68bb5dd932ee8d24eed631cdd519efc3
-  subpackages:
-  - internal/assertion
-  - internal/asyncassertion
-  - internal/testingtsupport
-  - matchers
-  - types
-  - internal/oraclematcher
-  - format
-  - matchers/support/goraph/bipartitegraph
-  - matchers/support/goraph/edge
-  - matchers/support/goraph/node
-  - matchers/support/goraph/util
 - name: github.com/prometheus/client_golang
   version: 5636dc67ae776adf5590da7349e70fbb9559972d
   subpackages:
@@ -71,7 +91,7 @@ imports:
 - name: github.com/prometheus/procfs
   version: abf152e5f3e97f2fafac028d2cc06c1feb87ffa5
 - name: golang.org/x/net
-  version: ffe101cce3477a6c6d8f0754d103bb0a84ec1266
+  version: cf4effbb9db1f3ef07f7e1891402991b6afbb276
   subpackages:
   - context
   - http2
@@ -82,20 +102,21 @@ imports:
   - internal/timeseries
   - context/ctxhttp
 - name: golang.org/x/oauth2
-  version: 3c3a985cb79f52a3190fbc056984415ca6763d01
+  version: 1e695b1c8febf17aad3bfa7bf0a819ef94b98ad5
   subpackages:
   - google
   - internal
   - jws
   - jwt
 - name: google.golang.org/api
-  version: adba394bac5800ff2e620d040e9401528f5b7615
+  version: 45c1c8fbb52e06888fad4b269d9e1c280d638f42
   subpackages:
   - option
+  - iterator
   - transport
   - internal
 - name: google.golang.org/appengine
-  version: 926995697fa8241be2dc73eb318666e24f44ed51
+  version: 3f4dbbc0ec153a39878fd524ece9f39732bd4998
   subpackages:
   - socket
   - urlfetch
@@ -109,28 +130,30 @@ imports:
   - internal/log
   - internal/remote_api
 - name: google.golang.org/genproto
-  version: 44808ed2d86e258615bb701d395cbbfe6686a3e6
+  version: 9359a8d303c45e3212571b77610f1cefb0c6f3eb
   subpackages:
   - googleapis/api/monitoredres
   - googleapis/logging/type
   - googleapis/logging/v2
-  - googleapis/api/label
   - googleapis/api/serviceconfig
   - googleapis/rpc/status
+  - googleapis/api/label
   - googleapis/api/metric
   - protobuf
 - name: google.golang.org/grpc
-  version: b1a2821ca5a4fd6b6e48ddfbb7d6d7584d839d21
+  version: 9eaed1a74af580b44448989c8ed830bc210bddf4
   subpackages:
   - codes
   - metadata
   - credentials
-  - credentials/oauth
   - grpclog
   - internal
   - naming
   - transport
+  - credentials/oauth
   - peer
+- name: google/api/servicecontrol/v1
+  version: ""
 - name: gopkg.in/yaml.v2
   version: a5b47d31c556af34a302ce5d659e6fea44d90de0
-testImports: []
+devImports: []
