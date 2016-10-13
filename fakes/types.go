@@ -2,8 +2,8 @@ package fakes
 
 import (
 	"container/list"
-	sc "google/api/servicecontrol/v1"
 	"github.com/cloudendpoints/mixologist/mixologist"
+	sc "google/api/servicecontrol/v1"
 	"sync"
 )
 
@@ -42,5 +42,12 @@ type (
 		err     error
 		meta    map[string]interface{}
 		Checker *checker
+	}
+	flist struct {
+		Wl string `yaml:",omitempty,required"`
+	}
+	checkerConfig struct {
+		OnCall string `yaml:",omitempty,required"`
+		Flist  flist
 	}
 )

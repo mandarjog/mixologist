@@ -1,0 +1,15 @@
+config:
+    - selector: 
+        serviceid: *
+        consumerid: *
+        direction: [self, egress, ingress]
+        fn: [check, report]
+      adapters:
+      - kind: statsd
+        params:
+          host: statsd
+          port: 9317
+        # batch 200 reports before calling the adapter
+        batchparams:
+          size: 200
+

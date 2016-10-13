@@ -1,0 +1,17 @@
+_EVERY_SERVICE_:  # Applies to every interaction:- between all consumers and producers
+  serviceid: _EVERY_SERVICE_
+  ingress:
+    reporters:
+    - kind: statsd
+      params:
+          addr: "statsd:8125"
+    - kind: prometheus
+    - kind: mixologist.io/consumers/logsAdapter
+      params:
+          backends:
+              - glog
+              - stackdriver
+    checkers:
+    - kind: whitelist
+      params:
+          providerurl: https://gist.githubusercontent.com/mandarjog/c38f4a992cc5d470ad763e70eca709b9/raw/

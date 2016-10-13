@@ -116,8 +116,22 @@ type (
 		Check(*sc.CheckRequest) (*sc.CheckError, error)
 	}
 
+	AdapterBuilder interface {
+		// ConfigStruct -- return a pointer to an instance of a struct needed to configure this checker
+		// Typically the implementation is a one-liner. ex:
+		// return &CheckerConfig{}
+		ConfigStruct() (confPtr interface{})
+
+		// ValidateConfig -- validate configuration struct. Return error if validation fails
+		ValidateConfig(conf interface{}) error
+	}
+
 	// CheckerBuilder -- build an instance of a checker
 	CheckerBuilder interface {
-		BuildChecker(Config) (Checker, error)
+		// AdapterBuilder -- embedded
+		AdapterBuilder
+		// BuildChecker -- given a pointer to a properly filled struct obtained from ConfigStruct(),
+		// return an initialized checker
+		BuildChecker(interface{}) (Checker, error)
 	}
 )

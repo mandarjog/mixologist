@@ -2,13 +2,14 @@ package whitelist
 
 import (
 	"crypto/sha1"
+	"github.com/cloudendpoints/mixologist/mixologist"
 	"github.com/golang/glog"
 	sc "google/api/servicecontrol/v1"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"net"
 	"net/http"
-	"github.com/cloudendpoints/mixologist/mixologist"
+	"net/url"
 	"strings"
 	"sync"
 	"time"
@@ -120,10 +121,24 @@ func init() {
 	mixologist.RegisterChecker(Name, new(builder))
 }
 
-func (b *builder) BuildChecker(cfg mixologist.Config) (mixologist.Checker, error) {
+// BuildChecker -- exported method
+func (b *builder) BuildChecker(cfg interface{}) (mixologist.Checker, error) {
+	wlcfg := cfg.(*Config)
 	chk := &checker{
-		backend: cfg.WhiteListBackEnd,
+		backend: wlcfg.ProviderURL,
 	}
 	go chk.updateConfigLoop()
 	return chk, nil
+}
+
+// ConfigStruct -- return pointer to Config struct
+func (b *builder) ConfigStruct() interface{} {
+	return &Config{}
+}
+
+// ValidateConfig -- validate given config
+func (b *builder) ValidateConfig(cfg interface{}) error {
+	wlcfg := cfg.(*Config)
+	_, err := url.Parse(wlcfg.ProviderURL)
+	return err
 }

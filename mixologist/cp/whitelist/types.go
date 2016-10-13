@@ -31,11 +31,11 @@ type (
 
 	// Config -- struct needed to configure this checker
 	Config struct {
-		ProviderURL string
+		ProviderURL string `yaml:"providerurl" required:"true"`
 	}
 	// CfgList -- file format of the exteral file denoting a whitelist
 	CfgList struct {
-		WhiteList []string `yaml:"whitelist"`
+		WhiteList []string `yaml:"whitelist" required:"true"`
 	}
 )
 
