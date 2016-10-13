@@ -26,6 +26,14 @@ type (
 		Kind string
 		// opaque params passed to the adapter
 		Params interface{} `yaml:",omitempty"`
+	}
+	// AdapterParams -- constructor params and associated params
+	AdapterParams struct {
+		// Identifier of this adapter
+		// should be unique within Kind, optional
+		ID string
+		// ConstructorParams embedded
+		ConstructorParams `yaml:",omitempty,inline"`
 
 		// cache params
 		CacheParams CacheParams `yaml:",omitempty"`
@@ -37,8 +45,8 @@ type (
 	// AdapterConfig -- in the given context
 	// represents adapter configrations for all defined functions
 	AdapterConfig struct {
-		Checkers  []ConstructorParams `yaml:",omitempty"`
-		Reporters []ConstructorParams `yaml:",omitempty"`
+		Checkers  []AdapterParams `yaml:",omitempty"`
+		Reporters []AdapterParams `yaml:",omitempty"`
 		// other functions
 	}
 	// BindingConfig -- same as adapter config + service

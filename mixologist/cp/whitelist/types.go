@@ -25,6 +25,8 @@ type (
 		// wl holds value of type []*net.IPNet
 		atomicWhitelist atomic.Value
 		fetchedSha      [sha1.Size]byte
+
+		closing chan bool
 	}
 
 	// Config -- struct needed to configure this checker

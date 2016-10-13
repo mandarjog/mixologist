@@ -105,14 +105,18 @@ func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "%s", h.prefix)
 }
 
-// Checker
+// Name -- Checker#Name
 func (c *checker) Name() string {
 	return c.name
 }
 
+// Check -- Checker#Check
 func (c *checker) Check(*sc.CheckRequest) (serr *sc.CheckError, err error) {
 	return
 }
+
+// Unload -- Checker#Name
+func (c *checker) Unload() {}
 
 // Check implementation
 // Always return a success

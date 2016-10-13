@@ -6,11 +6,19 @@ import (
 	"gopkg.in/yaml.v2"
 	"net/http"
 	"net/http/httptest"
+	"runtime"
 	"testing"
 )
 
-func TestWhitelistFetch(t *testing.T) {
+func build(url string) (*checker, error) {
+	chk, err := new(builder).BuildChecker(&Config{
+		ProviderURL: url,
+	})
 
+	return chk.(*checker), err
+}
+
+func TestWhitelistFetch(t *testing.T) {
 	cfg := CfgList{
 		WhiteList: []string{"10.10.11.2", "10.10.11.3"},
 	}
@@ -24,13 +32,10 @@ func TestWhitelistFetch(t *testing.T) {
 		}
 		w.Write(out)
 	}))
-	wl := &checker{
-		backend: ts.URL,
-	}
 	defer ts.Close()
-
+	wl, err := build(ts.URL)
 	clnt := &http.Client{}
-	err := wl.updateConfig(clnt)
+	err = wl.updateConfig(clnt)
 	if err != nil {
 		t.Errorf("Expected success, got %s", err)
 	}
@@ -52,6 +57,25 @@ func TestWhitelistFetch(t *testing.T) {
 	if !wl.checkWhiteList(IPAddr) {
 		t.Errorf("Failed: Expected %s in whitelist (%v)", IPAddr, wl.whitelist())
 	}
+}
+
+func TestWhiteListUnload(t *testing.T) {
+	g.RegisterTestingT(t)
+	wl, err := build("")
+	g.Expect(err).To(g.BeNil())
+	finalized := false
+	// check adapter is eventually unloaded
+	// This test ensures that after unload is called
+	// the adapter is removed from memory
+	runtime.SetFinalizer(wl, func(ff interface{}) {
+		finalized = true
+	})
+	wl.Unload()
+	runtime.GC()
+	g.Eventually(func() bool {
+		runtime.GC()
+		return finalized
+	}).Should(g.BeTrue(), "Adapter was not fully unloaded")
 }
 
 func checkRequest(ipaddr string) *sc.CheckRequest {

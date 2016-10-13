@@ -107,6 +107,11 @@ type (
 		BuildConsumer(Config) (ReportConsumer, error)
 	}
 
+	Unloader interface {
+		// Unload -- Called when this checker is no longer needed
+		Unload()
+	}
+
 	// Checker -- components that wish to perform checks on a request
 	Checker interface {
 		// Name -- name of this checker
@@ -114,6 +119,8 @@ type (
 		// Check -- check if the current request should go thru
 		// per this checker
 		Check(*sc.CheckRequest) (*sc.CheckError, error)
+		// Unload -- called when this adapter is no longer needed
+		Unloader
 	}
 
 	AdapterBuilder interface {

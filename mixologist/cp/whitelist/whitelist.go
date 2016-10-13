@@ -51,15 +51,24 @@ func (c *checker) Check(cr *sc.CheckRequest) (*sc.CheckError, error) {
 // updateConfig -- fetch list from backend and populate datastructure
 func (c *checker) updateConfigLoop() {
 	ticker := time.NewTicker(time.Second * 5)
+	defer ticker.Stop()
+
 	clnt := &http.Client{
 		Timeout: time.Second * 5,
 	}
 	// nearly synchronous config fetch
 	c.updateConfig(clnt)
+	done := false
 
-	for _ = range ticker.C {
-		c.updateConfig(clnt)
+	for !done {
+		select {
+		case <-ticker.C:
+			c.updateConfig(clnt)
+		case <-c.closing:
+			done = true
+		}
 	}
+	glog.V(2).Info("Unloaded")
 }
 
 // updateConfig -- fetch list from backend and populate datastructure
@@ -77,6 +86,7 @@ func (c *checker) updateConfig(clnt *http.Client) error {
 
 	newsha := sha1.Sum(buf)
 	// c.fetchedSha is only read and written by this function
+	// in a single thread
 	if newsha != c.fetchedSha {
 		glog.Infoln("Fetched new config from ", c.backend)
 		wlcfg := CfgList{}
@@ -86,8 +96,7 @@ func (c *checker) updateConfig(clnt *http.Client) error {
 			return err
 		}
 		// Now create a new map and install it
-		wl := buildWhiteList(wlcfg.WhiteList...)
-		c.setWhitelist(wl)
+		c.setWhitelist(buildWhiteList(wlcfg.WhiteList...))
 		c.fetchedSha = newsha
 	}
 	return nil
@@ -115,6 +124,10 @@ func (c *checker) Name() string {
 	return Name
 }
 
+func (c *checker) Unload() {
+	close(c.closing)
+}
+
 func init() {
 	mixologist.RegisterChecker(Name, new(builder))
 }
@@ -124,6 +137,7 @@ func (b *builder) BuildChecker(cfg interface{}) (mixologist.Checker, error) {
 	wlcfg := cfg.(*Config)
 	chk := &checker{
 		backend: wlcfg.ProviderURL,
+		closing: make(chan bool),
 	}
 	// install an empty list
 	chk.atomicWhitelist.Store([]*net.IPNet{})

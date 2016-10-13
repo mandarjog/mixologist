@@ -60,9 +60,11 @@ var (
 		EveryService: ServiceConfig{
 			ServiceID: EveryService,
 			Ingress: AdapterConfig{
-				Reporters: []ConstructorParams{
-					ConstructorParams{
-						Kind: "gcloud.logging",
+				Reporters: []AdapterParams{
+					AdapterParams{
+						ConstructorParams: ConstructorParams{
+							Kind: "gcloud.logging",
+						},
 					},
 				},
 			},
@@ -70,46 +72,50 @@ var (
 		InventoryService: ServiceConfig{
 			ServiceID: InventoryService,
 			Ingress: AdapterConfig{
-				Checkers: []ConstructorParams{
-					ConstructorParams{
-						Kind: "whitelist",
-						Params: map[string]interface{}{
-							"provider_url": "http://mywhitelist",
-						},
-					},
-					ConstructorParams{
-						// By default this service allows
-						// 100 req /s
-						Kind: "ratelimiter",
-						Params: map[string]interface{}{
-							"rate": "100/s",
-						},
-					},
+				Checkers: []AdapterParams{
+					AdapterParams{
+						ConstructorParams: ConstructorParams{
+							Kind: "whitelist",
+							Params: map[interface{}]interface{}{
+								"provider_url": "http://mywhitelist",
+							},
+						}},
+					AdapterParams{
+						ConstructorParams: ConstructorParams{
+							// By default this service allows
+							// 100 req /s
+							Kind: "ratelimiter",
+							Params: map[interface{}]interface{}{
+								"rate": "100/s",
+							},
+						}},
 				},
-				Reporters: []ConstructorParams{
-					ConstructorParams{
-						Kind: "statsd",
-						Params: map[string]interface{}{
-							"host": "statsd",
-							"port": 9317,
-						},
-					},
+				Reporters: []AdapterParams{
+					AdapterParams{
+						ConstructorParams: ConstructorParams{
+							Kind: "statsd",
+							Params: map[interface{}]interface{}{
+								"host": "statsd",
+								"port": 9317,
+							},
+						}},
 				},
 			},
 			Consumers: map[string]BindingConfig{
 				BindingID: BindingConfig{
 					ShippingService,
 					AdapterConfig{
-						Checkers: []ConstructorParams{
-							ConstructorParams{
-								// For Shipping Service, this service allows
-								// a higher rate
-								Kind: "ratelimiter",
-								Params: map[string]interface{}{
-									"rate": "1000/s",
+						Checkers: []AdapterParams{
+							AdapterParams{
+								ConstructorParams: ConstructorParams{
+									// For Shipping Service, this service allows
+									// a higher rate
+									Kind: "ratelimiter",
+									Params: map[interface{}]interface{}{
+										"rate": "1000/s",
+									},
 								},
-							},
-						},
+							}},
 					},
 				},
 			},
@@ -118,26 +124,28 @@ var (
 			ServiceID: ShippingService,
 			// Send my logs to aws.logging regardless of who I am calling
 			Egress: AdapterConfig{
-				Reporters: []ConstructorParams{
-					ConstructorParams{
-						Kind: "aws.logging",
-					},
-				},
+				Reporters: []AdapterParams{
+					AdapterParams{
+						ConstructorParams: ConstructorParams{
+							Kind: "aws.logging",
+						},
+					}},
 			},
 			Producers: map[string]BindingConfig{
 				BindingID: BindingConfig{
 					InventoryService,
 					AdapterConfig{
-						Checkers: []ConstructorParams{
-							ConstructorParams{
-								// Inventory Service is expensive to call
-								// I (ShippingService) wants to impose a lower limit
-								Kind: "ratelimiter",
-								Params: map[string]interface{}{
-									"rate": "5/s",
+						Checkers: []AdapterParams{
+							AdapterParams{
+								ConstructorParams: ConstructorParams{
+									// Inventory Service is expensive to call
+									// I (ShippingService) wants to impose a lower limit
+									Kind: "ratelimiter",
+									Params: map[interface{}]interface{}{
+										"rate": "5/s",
+									},
 								},
-							},
-						},
+							}},
 					},
 				},
 			},
