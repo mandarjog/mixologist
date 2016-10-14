@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"runtime"
+	"sync/atomic"
 	"testing"
 )
 
@@ -33,9 +34,11 @@ func TestWhitelistFetch(t *testing.T) {
 		w.Write(out)
 	}))
 	defer ts.Close()
-	wl, err := build(ts.URL)
+	wl := &checker{
+		backend: ts.URL,
+	}
 	clnt := &http.Client{}
-	err = wl.updateConfig(clnt)
+	err := wl.updateConfig(clnt)
 	if err != nil {
 		t.Errorf("Expected success, got %s", err)
 	}
@@ -63,18 +66,19 @@ func TestWhiteListUnload(t *testing.T) {
 	g.RegisterTestingT(t)
 	wl, err := build("")
 	g.Expect(err).To(g.BeNil())
-	finalized := false
+	var finalized atomic.Value
+	finalized.Store(false)
 	// check adapter is eventually unloaded
 	// This test ensures that after unload is called
 	// the adapter is removed from memory
 	runtime.SetFinalizer(wl, func(ff interface{}) {
-		finalized = true
+		finalized.Store(true)
 	})
 	wl.Unload()
 	runtime.GC()
 	g.Eventually(func() bool {
 		runtime.GC()
-		return finalized
+		return finalized.Load().(bool)
 	}).Should(g.BeTrue(), "Adapter was not fully unloaded")
 }
 
