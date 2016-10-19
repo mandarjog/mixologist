@@ -43,7 +43,7 @@ spec:
   selector:
     app: bookstore-esp
   type: LoadBalancer
-----
+---
 apiVersion: v1
 kind: ReplicationController
 metadata:
@@ -94,7 +94,7 @@ spec:
     name: mixologist
   selector:
     app: mixologist
-----
+---
 apiVersion: v1
 kind: ReplicationController
 metadata:
@@ -131,7 +131,7 @@ spec:
     name: prometheus
   selector:
     app: prometheus
-----
+---
 apiVersion: v1
 kind: ReplicationController
 metadata:
@@ -176,7 +176,7 @@ spec:
   selector:
     app: grafana
   type: LoadBalancer
-----
+---
 apiVersion: v1
 kind: ReplicationController
 metadata:
@@ -212,7 +212,7 @@ spec:
     name: graphite
   selector:
     app: statsd
-----
+---
 apiVersion: v1
 kind: ReplicationController
 metadata:
