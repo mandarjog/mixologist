@@ -1,14 +1,15 @@
 package mixologist
 
 import (
-	"github.com/golang/glog"
-	"github.com/golang/protobuf/proto"
-	"golang.org/x/net/context"
 	sc "google/api/servicecontrol/v1"
 	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/golang/glog"
+	"github.com/golang/protobuf/proto"
+	"golang.org/x/net/context"
 )
 
 // NewHandler -- return a handler with initialized handler map
@@ -97,18 +98,18 @@ func (h *Handler) getServerFn(w http.ResponseWriter, r *http.Request) serverFn {
 }
 
 // Implement Handler API
-func (h *Handler) serveHTTP(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) serveHTTP(w http.ResponseWriter, r *http.Request) bool {
 	// check for registered handlers
 	for _, ph := range h.ReportHandlers {
 		if strings.HasPrefix(r.RequestURI, ph.Prefix) {
 			ph.Handler.ServeHTTP(w, r)
-			return
+			return false
 		}
 	}
 
 	var fn = h.getServerFn(w, r)
 	if fn == nil {
-		return
+		return true
 	}
 
 	ctx := context.Background()
@@ -119,7 +120,7 @@ func (h *Handler) serveHTTP(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
 		glog.Error(err)
-		return
+		return true
 	}
 	if respb, err := h.marshal(resp); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -128,12 +129,14 @@ func (h *Handler) serveHTTP(w http.ResponseWriter, r *http.Request) {
 	} else {
 		w.Write(respb)
 	}
+	return true
 }
 
 // ServerHTTP -- Loggin handler over normal http
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	t := time.Now()
 	ww := buildLoggingWriter(w)
-	h.serveHTTP(ww, r)
-	ww.LogAccess(r, time.Now().Sub(t))
+	if h.serveHTTP(ww, r) {
+		ww.LogAccess(r, time.Now().Sub(t))
+	}
 }

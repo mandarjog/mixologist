@@ -1,11 +1,14 @@
 package mixologist
 
 import (
-	"github.com/golang/protobuf/proto"
-	"golang.org/x/net/context"
 	sc "google/api/servicecontrol/v1"
 	"io"
 	"net/http"
+	"sync"
+	"sync/atomic"
+
+	"github.com/golang/protobuf/proto"
+	"golang.org/x/net/context"
 )
 
 type (
@@ -67,7 +70,10 @@ type (
 	}
 
 	CheckerManager struct {
-		checkers []Checker
+		cfg atomic.Value
+
+		lock     sync.RWMutex
+		checkers map[ConstructorParams]Checker
 	}
 	// ControllerImpl -- The controller that is implemented by framework itself
 	// It delelegates the actual work to a the *real* ServiceControllerServer

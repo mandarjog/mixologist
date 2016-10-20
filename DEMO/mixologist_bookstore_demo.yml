@@ -112,8 +112,9 @@ spec:
       - name: mixologist
         image: ${MIXOLOGIST_IMAGE}
         args: [
-          "-v=0",
-          "-logtostderr=true"
+          "-v=2",
+          "-logtostderr=true",
+          "-config_file=https://gist.githubusercontent.com/mandarjog/34217d1523676f45d01a0884c1e7922f/raw/"
         ]
         ports:
           - containerPort: 9092

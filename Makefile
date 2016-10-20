@@ -1,17 +1,22 @@
+TOP := $(shell pwd)
+MIXREPO := github.com/cloudendpoints/mixologist
+
+
 DEV_REPO := gcr.io/$(PROJECT_ID)/mixologist-$(USER)
+GLIDE := build/glide.$(shell uname)
 
-all: build
+all: inst build
 
-proto:
-	@ if ! which protoc > /dev/null; then \
-		echo "error: protoc not installed" >&2; \
-		exit 1; \
-	fi
-	go get -u -v github.com/golang/protobuf/protoc-gen-go
-	# use $$dir as the root for all proto files in the same directory
-	for dir in $$(git ls-files '*.proto' | xargs -n1 dirname | uniq); do \
-		protoc -I $$dir --go_out=plugins=grpc:$$dir $$dir/*.proto; \
-	done
+inst:
+	$(GLIDE) install
+
+check:
+ifndef GOPATH
+	$(error GOPATH is undefined)
+endif
+ifeq (,$(findstring $(MIXREPO),$(TOP)))
+	$(error project should be built at $(GOPATH)/src/$(MIXREPO))
+endif
 
 dep-prep:
 	@ if ! which golint > /dev/null; then \
@@ -22,12 +27,13 @@ dep-prep:
 
 test: mixologist-bin
 	go test -v -cpu 1,4 ./mixologist/...
-	go test -v -race -cpu 1,4 ./mixologist/...  
-	./script/coverage.sh 
+	go test -v -race -cpu 1,4 ./mixologist/...
+	./script/coverage.sh
 
 clean:
-	go clean -i ./... 
+	go clean -i ./...
 	rm -f mixologist-bin
+	rm -f client
 
 coverage: build
 	./script/coverage.sh --html
@@ -35,15 +41,17 @@ coverage: build
 mixologist-bin: dep-prep main.go mixologist/*.go
 	go build -o mixologist-bin main.go
 
-build: mixologist-bin main.go mixologist/*.go mixologist/rc/prometheus/*.go 
-	go vet main.go 
-	golint main.go 
+build: check mixologist-bin client main.go mixologist/*.go mixologist/rc/prometheus/*.go
+	go vet main.go
+	golint main.go
 	go vet `go list ./mixologist/...`
 	golint mixologist/...
 
+client: clnt/*.go
+	go build -o client clnt/check.go
 
 run: mixologist-bin
-	./mixologist-bin -v=1 -logtostderr=true
+	./mixologist-bin -v=2 -logtostderr=true
 
 
 docker: build clean
@@ -88,4 +96,6 @@ dev-redeploy: dev-build
 	dev-build \
 	dev-deploy \
 	dev-redeploy \
-	check-env
+	check-env \
+	check \
+	inst

@@ -1,157 +1,79 @@
 package mixologist
 
 import (
-	"errors"
-	"github.com/cloudendpoints/mixologist/mixologist/config"
-	"github.com/golang/glog"
-	"github.com/mitchellh/mapstructure"
-	"golang.org/x/net/context"
 	sc "google/api/servicecontrol/v1"
-	"reflect"
-	"strings"
+
+	"github.com/golang/glog"
+	"golang.org/x/net/context"
 )
 
-// DecodeError -- decoder specific error
-// contains a slice of required fields that were missed
-type DecodeError struct {
-	err     error
-	Missing []string
-}
-
-// Error -- conform to error interface
-func (e DecodeError) Error() string {
-	return e.err.Error()
-}
-
-// DE -- Create a new decoder error
-func NewDecoderError(err error) *DecodeError {
-	return &DecodeError{
-		err: err,
-	}
-}
-
-// Decode -- convert generic interface into the specific struct
-// that was provided by the adapter
-// If the struct is tagged with 'required' fields, appropriate errors
-// are returned.
-func Decode(src interface{}, dest interface{}) *DecodeError {
-	var md mapstructure.Metadata
-	mcfg := mapstructure.DecoderConfig{
-		Metadata: &md,
-		Result:   dest,
-	}
-	decoder, err := mapstructure.NewDecoder(&mcfg)
-	if err != nil {
-		return NewDecoderError(err)
-	}
-	err = decoder.Decode(src)
-	if err != nil {
-		return NewDecoderError(err)
-	}
-	// Check if any required keys are missing
-	value := reflect.Indirect(reflect.ValueOf(dest))
-
-	return Validate([]string{}, value, &md)
-}
-
-// Validate -- validate the filled struct with "required" and other tags
-func Validate(name []string, value reflect.Value, md *mapstructure.Metadata) *DecodeError {
-	var missing []string
-	for i := 0; i < value.NumField(); i++ {
-		fld := value.Type().Field(i)
-		tag, ok := fld.Tag.Lookup("yaml")
-		fldArr := append(name, fld.Name)
-		fldName := strings.Join(fldArr, ".")
-		vfld := value.Field(i)
-		if !ok {
-			tag = string(fld.Tag)
-		}
-		if strings.Contains(tag, "required") {
-			found := false
-			for _, k := range md.Keys {
-				if k == fldName {
-					found = true
-					break
-				}
-			}
-			if !found {
-				glog.Errorf("%#v >> %#v >> not found %s, %#v", fld, vfld, fld.Name, md.Keys)
-				missing = append(missing, fldName)
-			}
-		}
-		if vfld.Kind() == reflect.Struct {
-			er := Validate(fldArr, vfld, md)
-			if er != nil {
-				missing = append(missing, er.Missing...)
-			}
-		}
-	}
-	if len(missing) > 0 {
-		return &DecodeError{
-			err:     errors.New("Missing " + strings.Join(missing, ",")),
-			Missing: missing,
-		}
-	}
-	return nil
-}
-
-func ErrAdapterUnavailable(atype string) error {
-	return errors.New("Adater of type '" + atype + "' is not available")
-}
-
 // NewCheckerManager -- given a registry and a config object return a CheckerManager
-func NewCheckerManager(registry map[string]CheckerBuilder, c config.ServicesConfig) (*CheckerManager, []error) {
+func NewCheckerManager(registry map[string]CheckerBuilder, cfg *ServicesConfig) (*CheckerManager, []error) {
 	var erra []error
-	glog.Infof("Creating checker manager")
-	glog.V(2).Infof("checker manager config: %#v", c)
-	allsvc := c[config.EveryService]
-	checkerImpls := make([]Checker, 0, len(allsvc.Ingress.Checkers))
-	ctx := config.EveryService + ".Ingress.Checkers"
-	for _, checkerCfg := range allsvc.Ingress.Checkers {
-		checkerName := checkerCfg.Kind
-		glog.Info("Creating checker ", checkerName)
-		if cn, ok := registry[checkerName]; ok {
-			ccfg := cn.ConfigStruct()
-			err := Decode(checkerCfg.Params, ccfg)
-			if err != nil {
-				glog.Errorf("ERROR: Invalid Params for Adapter Type '%s' in %s: %s\ninput: %v\noutput: %#v", checkerName, ctx, err, checkerCfg.Params, ccfg)
-				erra = append(erra, err)
-				continue
-			}
-			if err := cn.ValidateConfig(ccfg); err != nil {
-				erra = append(erra, err)
-				glog.Error("validation failed: ", checkerName, " ", err, " ", ccfg)
-				continue
-			}
-			if cc, err := cn.BuildChecker(ccfg); cc != nil {
-				glog.Info("Built checker: ", checkerName, " ", cc, ccfg)
-				checkerImpls = append(checkerImpls, cc)
-			} else {
-				erra = append(erra, err)
-				glog.Error("Unable to build checker: ", checkerName, " ", err)
-			}
-		} else {
-			ers := ErrAdapterUnavailable(checkerName)
-			glog.Warning(ers)
-			erra = append(erra, ers)
-		}
+	cm := &CheckerManager{
+		checkers: make(map[ConstructorParams]Checker),
 	}
-	glog.Info("Available Checkers: ", len(checkerImpls))
-	return &CheckerManager{
-		checkers: checkerImpls,
-	}, erra
+	cm.cfg.Store(cfg)
+
+	return cm, erra
+}
+
+// FindChecker -- given a checker kind and AdapterParams return a checker
+func (c *CheckerManager) FindChecker(kind string, ru *RuntimeAdapterState) (chk Checker, err error) {
+	key := ConstructorParams{
+		Kind:   kind,
+		Params: ru.TypedParams,
+	}
+	c.lock.RLock()
+	chk, found := c.checkers[key]
+	c.lock.RUnlock()
+	if found {
+		return chk, nil
+	}
+
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
+	chk, found = c.checkers[key]
+	if !found {
+		if chk, err = ru.Builder.(CheckerBuilder).BuildChecker(ru.TypedParams); err != nil {
+			return nil, err
+		}
+		c.checkers[key] = chk
+	}
+	return chk, nil
 }
 
 // Check -- Top level check mehod that runs thru all registered checkers
 func (c *CheckerManager) Check(ctx context.Context, msg *sc.CheckRequest) (*sc.CheckResponse, error) {
-	// CheckErrors: []*sc.CheckError{&sc.CheckError{sc.CheckError_PERMISSION_DENIED, sc.CheckError_BUDGET_EXCEEDED.String()}},
-	//ce := make([]*sc.CheckError, 0, len(c.checkers))
+	cfg := c.cfg.Load().(*ServicesConfig)
+	checkers := cfg.Resolve(&ResolveKey{
+		Source:      msg.GetOperation().ConsumerId,
+		Destination: msg.ServiceName,
+		RpcMethod:   RPCCheck,
+	})
+	glog.V(2).Infof("Resolved: %d checkers %#v ==> %#v", len(checkers), *msg, checkers)
 	ce := []*sc.CheckError{}
-	for _, checker := range c.checkers {
-		glog.V(1).Infof("Checking %s %s", checker.Name(), msg)
-		cer, er := checker.Check(msg)
+	for _, checker := range checkers {
+		glog.V(1).Infof("Checking %s %s", checker.Kind, msg)
+		ru, converted := checker.Params.(*RuntimeAdapterState)
+		if !converted {
+			glog.Warningf("%s was not converted", checker.Kind)
+			continue
+		}
+
+		chk, err := c.FindChecker(checker.Kind, ru)
+		if err != nil {
+			glog.Warningf("%s Could not get checker %s", checker.Kind, err)
+			continue
+		}
+
+		cer, er := chk.Check(msg)
 		if er != nil {
-			cer = &sc.CheckError{sc.CheckError_PERMISSION_DENIED, er.Error()}
+			cer = &sc.CheckError{
+				Code:   sc.CheckError_PERMISSION_DENIED,
+				Detail: er.Error(),
+			}
 		}
 		if cer != nil {
 			ce = append(ce, cer)
@@ -163,6 +85,11 @@ func (c *CheckerManager) Check(ctx context.Context, msg *sc.CheckRequest) (*sc.C
 	}, nil
 }
 
+func (c *CheckerManager) ConfigChange(cfg *ServicesConfig) {
+	glog.V(1).Infof("ConfigChanged", *cfg)
+	c.cfg.Store(cfg)
+}
+
 func (c *CheckerManager) Checkers() []Checker {
-	return c.checkers
+	return []Checker{}
 }

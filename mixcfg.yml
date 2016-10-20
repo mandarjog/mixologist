@@ -15,3 +15,18 @@ _EVERY_SERVICE_:  # Applies to every interaction:- between all consumers and pro
     - kind: whitelist
       params:
           providerurl: https://gist.githubusercontent.com/mandarjog/c38f4a992cc5d470ad763e70eca709b9/raw/
+    - kind: whitelist1
+      params:
+          providerurl: https://gist.githubusercontent.com/mandarjog/c38f4a992cc5d470ad763e70eca709b9/raw/
+
+service1:
+  serviceid: service1
+  consumers:
+      "api_key:aaaa":
+          serviceid: aaaa
+          adapters:
+              checkers:
+              - kind: block
+                params:
+                    message: shame on you, access denied
+

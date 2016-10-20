@@ -3,7 +3,6 @@ package mixologist_test
 import (
 	"github.com/cloudendpoints/mixologist/fakes"
 	. "github.com/cloudendpoints/mixologist/mixologist"
-	"github.com/cloudendpoints/mixologist/mixologist/config"
 	gn "github.com/onsi/ginkgo"
 	g "github.com/onsi/gomega"
 	sc "google/api/servicecontrol/v1"
@@ -12,11 +11,11 @@ import (
 
 var _ = gn.Describe("ControllerImpl", func() {
 	var (
-		cfg = config.ServicesConfig{}
+		cfg = ServicesConfig{}
 		reg = map[string]CheckerBuilder{
 			"fakechecker": fakes.NewCheckerBuilder("fakechecker", nil),
 		}
-		checkerMgr, _ = NewCheckerManager(reg, cfg)
+		checkerMgr, _ = NewCheckerManager(reg, &cfg)
 		ctrl          = NewControllerImpl(checkerMgr)
 	)
 

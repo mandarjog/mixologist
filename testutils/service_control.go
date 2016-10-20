@@ -33,10 +33,11 @@ import (
 	"math"
 	"sort"
 
+	"google/api/servicecontrol/v1"
+
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes/struct"
 	"google.golang.org/genproto/googleapis/logging/type"
-	"google/api/servicecontrol/v1"
 )
 
 type ExpectedCheck struct {
@@ -104,8 +105,8 @@ func CreateCheck(er *ExpectedCheck) servicecontrol.CheckRequest {
 			ConsumerId:    er.ConsumerID,
 			OperationId:   er.OperationId,
 			Labels: map[string]string{
-				"servicecontrol.googleapis.com/user_agent":    "ESP",
-				"servicecontrol.googleapis.com/service_agent": "ESP/" + er.Version,
+				"servicecontrol.googleapis.com/user_agent":    "MIX-CLNT",
+				"servicecontrol.googleapis.com/service_agent": "MIX-CLNT/" + er.Version,
 			},
 		},
 	}
@@ -125,8 +126,8 @@ func responseCodes(code int) (response, status, class string) {
 func createReportLabels(er *ExpectedReport) map[string]string {
 	response, status, class := responseCodes(er.ResponseCode)
 	labels := map[string]string{
-		"servicecontrol.googleapis.com/service_agent": "ESP/" + er.Version,
-		"servicecontrol.googleapis.com/user_agent":    "ESP",
+		"servicecontrol.googleapis.com/service_agent": "MIX-CLNT/" + er.Version,
+		"servicecontrol.googleapis.com/user_agent":    "MIX-CLNT",
 		"serviceruntime.googleapis.com/api_method":    er.ApiMethod,
 		"cloud.googleapis.com/location":               er.Location,
 		"/response_code":                              response,

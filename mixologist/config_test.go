@@ -1,12 +1,16 @@
-package config
+package mixologist_test
 
 import (
-	"github.com/mitchellh/mapstructure"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"path"
 	"runtime"
+	"strings"
 	"testing"
+
+	"github.com/cloudendpoints/mixologist/fakes"
+	. "github.com/cloudendpoints/mixologist/mixologist"
+	"github.com/mitchellh/mapstructure"
+	"gopkg.in/yaml.v2"
 )
 
 var (
@@ -19,10 +23,12 @@ func init() {
 }
 
 func TestFormat(t *testing.T) {
-	data, _ := ioutil.ReadFile(path.Join(DirName, "config_test.yml"))
+	data, _ := ioutil.ReadFile(path.Join(DirName, "config/config_test.yml"))
 	osc := ServicesConfig{}
-	yaml.Unmarshal(data, &osc)
-
+	err := yaml.Unmarshal(data, &osc)
+	if err != nil {
+		t.Error("Unmarshal failed", err)
+	}
 	type RLParams struct {
 		Rate string
 	}
@@ -49,7 +55,27 @@ func TestFormat(t *testing.T) {
 			}
 		}
 	}
+	if osc[InventoryService].Consumers[BindingID].Adapters.Checkers == nil {
+		t.Errorf("Expected: binding not nil")
+	}
 
+	reg := map[string]CheckerBuilder{
+		"fakechecker": fakes.NewCheckerBuilder("fakechecker", nil),
+	}
+
+	_, erra := ConvertParams(osc, reg)
+
+	availabilityErrors := 0
+
+	for _, er := range erra {
+		if strings.HasSuffix(er.Error(), "is not available") {
+			availabilityErrors += 1
+		}
+	}
+
+	if (len(erra) - availabilityErrors) > 0 {
+		t.Errorf("Got errors while converting %#v", erra[0])
+	}
 }
 
 var (
@@ -57,11 +83,11 @@ var (
 	ShippingService  = "Service.Shipping.1"
 	BindingID        = "BindingID.1"
 	SC               = ServicesConfig{
-		EveryService: ServiceConfig{
+		EveryService: &ServiceConfig{
 			ServiceID: EveryService,
-			Ingress: AdapterConfig{
-				Reporters: []AdapterParams{
-					AdapterParams{
+			Ingress: &AdapterConfig{
+				Reporters: []*AdapterParams{
+					&AdapterParams{
 						ConstructorParams: ConstructorParams{
 							Kind: "gcloud.logging",
 						},
@@ -69,18 +95,18 @@ var (
 				},
 			},
 		},
-		InventoryService: ServiceConfig{
+		InventoryService: &ServiceConfig{
 			ServiceID: InventoryService,
-			Ingress: AdapterConfig{
-				Checkers: []AdapterParams{
-					AdapterParams{
+			Ingress: &AdapterConfig{
+				Checkers: []*AdapterParams{
+					&AdapterParams{
 						ConstructorParams: ConstructorParams{
 							Kind: "whitelist",
 							Params: map[interface{}]interface{}{
 								"provider_url": "http://mywhitelist",
 							},
 						}},
-					AdapterParams{
+					&AdapterParams{
 						ConstructorParams: ConstructorParams{
 							// By default this service allows
 							// 100 req /s
@@ -90,8 +116,8 @@ var (
 							},
 						}},
 				},
-				Reporters: []AdapterParams{
-					AdapterParams{
+				Reporters: []*AdapterParams{
+					&AdapterParams{
 						ConstructorParams: ConstructorParams{
 							Kind: "statsd",
 							Params: map[interface{}]interface{}{
@@ -101,12 +127,12 @@ var (
 						}},
 				},
 			},
-			Consumers: map[string]BindingConfig{
-				BindingID: BindingConfig{
+			Consumers: map[string]*BindingConfig{
+				BindingID: &BindingConfig{
 					ShippingService,
-					AdapterConfig{
-						Checkers: []AdapterParams{
-							AdapterParams{
+					&AdapterConfig{
+						Checkers: []*AdapterParams{
+							&AdapterParams{
 								ConstructorParams: ConstructorParams{
 									// For Shipping Service, this service allows
 									// a higher rate
@@ -120,23 +146,23 @@ var (
 				},
 			},
 		},
-		ShippingService: ServiceConfig{
+		ShippingService: &ServiceConfig{
 			ServiceID: ShippingService,
 			// Send my logs to aws.logging regardless of who I am calling
-			Egress: AdapterConfig{
-				Reporters: []AdapterParams{
-					AdapterParams{
+			Egress: &AdapterConfig{
+				Reporters: []*AdapterParams{
+					&AdapterParams{
 						ConstructorParams: ConstructorParams{
 							Kind: "aws.logging",
 						},
 					}},
 			},
-			Producers: map[string]BindingConfig{
-				BindingID: BindingConfig{
+			Producers: map[string]*BindingConfig{
+				BindingID: &BindingConfig{
 					InventoryService,
-					AdapterConfig{
-						Checkers: []AdapterParams{
-							AdapterParams{
+					&AdapterConfig{
+						Checkers: []*AdapterParams{
+							&AdapterParams{
 								ConstructorParams: ConstructorParams{
 									// Inventory Service is expensive to call
 									// I (ShippingService) wants to impose a lower limit

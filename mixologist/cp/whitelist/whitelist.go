@@ -2,16 +2,18 @@ package whitelist
 
 import (
 	"crypto/sha1"
-	"github.com/cloudendpoints/mixologist/mixologist"
-	"github.com/golang/glog"
+	"errors"
 	sc "google/api/servicecontrol/v1"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"net"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/cloudendpoints/mixologist/mixologist"
+	"github.com/golang/glog"
+	"gopkg.in/yaml.v2"
 )
 
 // whitelist -- typed atomic accessor for whitelist
@@ -41,7 +43,7 @@ func (c *checker) Check(cr *sc.CheckRequest) (*sc.CheckError, error) {
 		if c.checkWhiteList(ip) {
 			return nil, nil
 		}
-		glog.V(1).Infof(ip, " Not in whitelist ", c.whitelist)
+		glog.V(1).Infof(ip, " Not in whitelist ", c.whitelist())
 		return IPBlockedCheckError, nil
 	}
 
@@ -153,6 +155,12 @@ func (b *builder) ConfigStruct() interface{} {
 // ValidateConfig -- validate given config
 func (b *builder) ValidateConfig(cfg interface{}) error {
 	wlcfg := cfg.(*Config)
-	_, err := url.Parse(wlcfg.ProviderURL)
+	var err error
+	var u *url.URL
+	if u, err = url.Parse(wlcfg.ProviderURL); err == nil {
+		if u.Scheme == "" || u.Host == "" {
+			err = errors.New("Scheme and Host cannot be nil")
+		}
+	}
 	return err
 }

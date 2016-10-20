@@ -1,23 +1,23 @@
 package mixologist_test
 
 import (
+	"testing"
+
 	"github.com/cloudendpoints/mixologist/fakes"
 	. "github.com/cloudendpoints/mixologist/mixologist"
-	"github.com/cloudendpoints/mixologist/mixologist/config"
 	g "github.com/onsi/gomega"
 	"gopkg.in/yaml.v2"
-	"testing"
 )
 
 func TestCheckerManager(t *testing.T) {
 	g.RegisterTestingT(t)
 
 	// empty test
-	cfg := config.ServicesConfig{}
+	cfg := ServicesConfig{}
 	reg := map[string]CheckerBuilder{
 		"fakechecker": fakes.NewCheckerBuilder("fakechecker", nil),
 	}
-	cm, erra := NewCheckerManager(reg, cfg)
+	cm, erra := NewCheckerManager(reg, &cfg)
 	g.Expect(cm).NotTo(g.BeNil())
 	g.Expect(erra).To(g.BeEmpty())
 	g.Expect(cm.Checkers()).Should(g.BeEmpty())
@@ -66,13 +66,14 @@ var fakecheckerWrongType = `
 
 func TestCheckerManagerValidate(t *testing.T) {
 	g.RegisterTestingT(t)
-	cfg := config.ServicesConfig{}
+	cfg := ServicesConfig{}
 	yaml.Unmarshal([]byte(yamlStr+whitelist), &cfg)
-	g.Expect(cfg[config.EveryService].Ingress.Checkers).ShouldNot(g.BeEmpty())
+	g.Expect(cfg[EveryService].Ingress.Checkers).ShouldNot(g.BeEmpty())
 	reg := map[string]CheckerBuilder{
 		"fakechecker": fakes.NewCheckerBuilder("fakechecker", nil),
 	}
-	cm, erra := NewCheckerManager(reg, cfg)
+	cfg, erra := ConvertParams(cfg, reg)
+	cm, _ := NewCheckerManager(reg, &cfg)
 	g.Expect(cm).NotTo(g.BeNil())
 	g.Expect(erra).NotTo(g.BeEmpty())
 	ers := ErrAdapterUnavailable("whitelist")
@@ -82,46 +83,41 @@ func TestCheckerManagerValidate(t *testing.T) {
 
 func TestCheckerManagerValidate1(t *testing.T) {
 	g.RegisterTestingT(t)
-	cfg := config.ServicesConfig{}
+	cfg := ServicesConfig{}
 	yaml.Unmarshal([]byte(yamlStr+fakechecker), &cfg)
-	g.Expect(cfg[config.EveryService].Ingress.Checkers).ShouldNot(g.BeEmpty())
+	g.Expect(cfg[EveryService].Ingress.Checkers).ShouldNot(g.BeEmpty())
 	reg := map[string]CheckerBuilder{
 		"fakechecker": fakes.NewCheckerBuilder("fakechecker", nil),
 	}
-	cm, erra := NewCheckerManager(reg, cfg)
+	cm, erra := NewCheckerManager(reg, &cfg)
 	g.Expect(cm).ShouldNot(g.BeNil())
 	g.Expect(erra).Should(g.BeEmpty())
-	g.Expect(cm.Checkers()).ShouldNot(g.BeEmpty())
+}
+
+func doTest(ymlStr string) []error {
+	cfg := ServicesConfig{}
+	yaml.Unmarshal([]byte(ymlStr), &cfg)
+	g.Expect(cfg[EveryService].Ingress.Checkers).ShouldNot(g.BeEmpty())
+	reg := map[string]CheckerBuilder{
+		"fakechecker": fakes.NewCheckerBuilder("fakechecker", nil),
+	}
+	cfg, erra := ConvertParams(cfg, reg)
+	cm, _ := NewCheckerManager(reg, &cfg)
+	g.Expect(cm).ShouldNot(g.BeNil())
+	g.Expect(erra).ShouldNot(g.BeEmpty())
+	return erra
 }
 
 func TestCheckerManagerValidate2(t *testing.T) {
 	g.RegisterTestingT(t)
-	cfg := config.ServicesConfig{}
-	yaml.Unmarshal([]byte(yamlStr+fakecheckerMissingRequired), &cfg)
-	g.Expect(cfg[config.EveryService].Ingress.Checkers).ShouldNot(g.BeEmpty())
-	reg := map[string]CheckerBuilder{
-		"fakechecker": fakes.NewCheckerBuilder("fakechecker", nil),
-	}
-	cm, erra := NewCheckerManager(reg, cfg)
-	g.Expect(cm).ShouldNot(g.BeNil())
-	g.Expect(erra).ShouldNot(g.BeEmpty())
+	erra := doTest(yamlStr + fakecheckerMissingRequired)
 	ve := erra[0].(*DecodeError)
 	g.Expect(ve.Missing[0]).To(g.Equal("Flist.Wl"))
-	g.Expect(cm.Checkers()).Should(g.BeEmpty())
 }
 
 func TestCheckerManagerValidate3(t *testing.T) {
 	g.RegisterTestingT(t)
-	cfg := config.ServicesConfig{}
-	yaml.Unmarshal([]byte(yamlStr+fakecheckerWrongType), &cfg)
-	g.Expect(cfg[config.EveryService].Ingress.Checkers).ShouldNot(g.BeEmpty())
-	reg := map[string]CheckerBuilder{
-		"fakechecker": fakes.NewCheckerBuilder("fakechecker", nil),
-	}
-	cm, erra := NewCheckerManager(reg, cfg)
-	g.Expect(cm).ShouldNot(g.BeNil())
-	g.Expect(erra).ShouldNot(g.BeEmpty())
+	erra := doTest(yamlStr + fakecheckerWrongType)
 	ve := erra[0].(*DecodeError)
 	g.Expect(ve.Error()).To(g.ContainSubstring("unconvertible type"))
-	g.Expect(cm.Checkers()).Should(g.BeEmpty())
 }

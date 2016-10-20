@@ -4,6 +4,12 @@ _EVERY_SERVICE_:  # Applies to every interaction:- between all consumers and pro
   ingress:
     reporters:
     - kind: gcloud.logging
+    checkers:
+    - kind: fakechecker
+      params:
+         oncall: superuser@acme.com
+         flist:
+          wl: "WL user"
 
 Service.Inventory.1: # service config that applies to id: 'Service.Inventory.1'
         # It is also 'owned' by this service
@@ -37,11 +43,12 @@ Service.Inventory.1: # service config that applies to id: 'Service.Inventory.1'
     # binding specific config
     BindingID.1:
       serviceid: Service.Shipping.1
-      checkers:
-      # For Service.Shipping.1 consumer increase the limit to 1000/s
-      - kind: ratelimiter
-        params:
-          rate: 1000/s
+      adapters:
+          checkers:
+          # For Service.Shipping.1 consumer increase the limit to 1000/s
+          - kind: ratelimiter
+            params:
+              rate: 1000/s
 Service.Shipping.1:
   serviceid: Service.Shipping.1
   egress:
@@ -52,10 +59,11 @@ Service.Shipping.1:
     # Same bindingID as above, but this config is 'owned' by Service.Shipping.1
     BindingID.1:
       serviceid: Service.Inventory.1
-      checkers:
-      # Calling Service.Inventory.1 is expensive. 'I' (Service.Shipping.1) would
-      # like to have a much lower limit regardless of what I am allowed.
-      # lower it to 5/s
-      - kind: ratelimiter
-        params:
-          rate: 5/s
+      adapters:
+          checkers:
+          # Calling Service.Inventory.1 is expensive. 'I' (Service.Shipping.1) would
+          # like to have a much lower limit regardless of what I am allowed.
+          # lower it to 5/s
+          - kind: ratelimiter
+            params:
+                rate: 5/s

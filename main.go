@@ -2,17 +2,16 @@ package main
 
 import (
 	"flag"
-	"github.com/cloudendpoints/mixologist/mixologist"
-	cfg "github.com/cloudendpoints/mixologist/mixologist/config"
-	"github.com/cloudendpoints/mixologist/mixologist/rc/statsd"
-	"github.com/golang/glog"
-	"gopkg.in/yaml.v2"
-	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
 
+	"github.com/cloudendpoints/mixologist/mixologist"
+	"github.com/cloudendpoints/mixologist/mixologist/rc/statsd"
+	"github.com/golang/glog"
+
 	// Needed for init()
+	_ "github.com/cloudendpoints/mixologist/mixologist/cp/block"
 	_ "github.com/cloudendpoints/mixologist/mixologist/cp/whitelist"
 	_ "github.com/cloudendpoints/mixologist/mixologist/rc/logsAdapter"
 	_ "github.com/cloudendpoints/mixologist/mixologist/rc/prometheus"
@@ -39,7 +38,6 @@ func init() {
 	// Logging configuration flags
 	flag.BoolVar(&config.Logging.UseDefault, "use_default_logger", true, "Toggles default logging (std{out|err})")
 
-	flag.StringVar(&config.WhiteListBackEnd, "whitelist_url", "https://gist.githubusercontent.com/mandarjog/c38f4a992cc5d470ad763e70eca709b9/raw/", "json/yml file with whitelist")
 }
 
 func main() {
@@ -47,15 +45,16 @@ func main() {
 	config.ReportConsumers = strings.Split(*reportConsumers, ",")
 	config.Checkers = strings.Split(*checkers, ",")
 	config.Logging.Backends = strings.Split(*loggingBackends, ",")
-	osc := cfg.ServicesConfig{}
-
-	if data, err := ioutil.ReadFile(*configFile); err != nil {
-		glog.Errorf("Unable to read %s:  %s", *configFile, err)
-	} else {
-		yaml.Unmarshal(data, &osc)
+	osc := mixologist.ServicesConfig{}
+	var err error
+	var configMgr *mixologist.ConfigManager
+	checkerMgr, _ := mixologist.NewCheckerManager(mixologist.CheckerRegistry, &osc)
+	if configMgr, err = mixologist.NewConfigManager(*configFile); err != nil {
+		glog.Exitf("Unable to start server " + err.Error())
 	}
+	configMgr.Register(checkerMgr)
+	go configMgr.Loop()
 
-	checkerMgr, _ := mixologist.NewCheckerManager(mixologist.CheckerRegistry, osc)
 	controller := mixologist.NewControllerImpl(checkerMgr)
 	rcMgr := mixologist.NewReportConsumerManager(controller.ReportQueue(), mixologist.ReportConsumerRegistry, config)
 	handler := mixologist.NewHandler(controller, rcMgr.GetPrefixAndHandlers())
@@ -66,7 +65,7 @@ func main() {
 	}
 	rcMgr.Start(*nConsumers)
 	glog.Info("Starting Server on " + addr)
-	err := srv.ListenAndServe()
+	err = srv.ListenAndServe()
 	if err != nil {
 		glog.Exitf("Unable to start server " + err.Error())
 	}
