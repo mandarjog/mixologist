@@ -9,6 +9,9 @@ all: inst build
 
 inst:
 	$(GLIDE) install
+	# client-go vendors needs to be removed because
+	# it also vendors glog and causes panic due to duplicate packages
+	rm -Rf $(TOP)/vendor/k8s.io/client-go/1.5/vendor
 
 check:
 ifndef GOPATH
