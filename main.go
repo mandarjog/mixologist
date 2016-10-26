@@ -29,6 +29,7 @@ var (
 	checkers        = flag.String("checkers", "whitelist,acl", "Comma-separated list of canonical names for report consumers")
 	loggingBackends = flag.String("logging_backends", "", "Comma-separated list of canonical names for logging export backends. If left empty, the default logging backend will be used (if enabled).")
 	configFile      = flag.String("config_file", "mixCfg.yml", "Yml config file")
+	kubeconfig      = flag.String("kubeconfig", "", "Path to kubeconfig")
 )
 
 func init() {
@@ -49,7 +50,7 @@ func main() {
 	var err error
 	var configMgr *mixologist.ConfigManager
 	checkerMgr, _ := mixologist.NewCheckerManager(mixologist.CheckerRegistry, &osc)
-	if configMgr, err = mixologist.NewConfigManager(*configFile); err != nil {
+	if configMgr, err = mixologist.NewConfigManager(*configFile, *kubeconfig); err != nil {
 		glog.Exitf("Unable to start server " + err.Error())
 	}
 	configMgr.Register(checkerMgr)
